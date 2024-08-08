@@ -25,24 +25,32 @@ pygame.display.set_caption('name work in progress')
 
 #variables
 move = 10
+map_x = -450
+map_y = -300
 
-#players
-player1_rect = pygame.Rect(450,300,50,50)
+#player
+player_rect = pygame.Rect(450,300,50,50)
  
-#functions
-def player_movement():
-    keys = pygame.key.get_pressed()
-    #player 1 movement
-    if keys[pygame.K_a]:
-        player1_rect.x -= move   
-    if keys[pygame.K_d]:
-        player1_rect.x += move
-    if keys[pygame.K_w]:
-        player1_rect.y -= move
-    if keys[pygame.K_s]:
-        player1_rect.y += move   
-         
+#floors
+floor_1_surface = pygame.image.load('floor_1.png').convert()
+floor_1_rect = floor_1_surface.get_rect(center = (map_x,map_y))
 
+#functions
+def player_movement_vert(y):
+    keys = pygame.key.get_pressed()
+    
+    if keys[pygame.K_w]:
+        y -= move
+    if keys[pygame.K_s]:
+        y += move   
+ 
+def player_movement_horz(x):
+    keys = pygame.key.get_pressed()
+    
+    if keys[pygame.K_a]:
+        x -= move   
+    if keys[pygame.K_d]:
+        x += move
 
 while True:
     for event in pygame.event.get():
@@ -50,10 +58,13 @@ while True:
             pygame.quit()
             sys.exit()
             
-    player_movement()
+    map_y = player_movement_vert(map_y)
+    map_x = player_movement_horz(map_x)
     
     screen.fill((0,0,0))
-    pygame.draw.rect(screen,(255,255,255),player1_rect)
+    screen.blit(floor_1_surface,floor_1_rect)
+    pygame.draw.rect(screen,(255,255,255),player_rect)
+    
 
     pygame.display.update()
     clock.tick(60) #frame rate
