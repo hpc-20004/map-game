@@ -18,8 +18,11 @@ from pygame.locals import QUIT
 pygame.init()
 clock = pygame.time.Clock()
 
-#create display surface
-screen = pygame.display.set_mode((900,600))
+#create display surface 900 x 600
+
+#temporary dimensions for wall creating is 2496 x 1664
+
+screen = pygame.display.set_mode((2496,1664))
 screen_rect = screen.get_rect()
 
 pygame.display.set_caption('name work in progress')
