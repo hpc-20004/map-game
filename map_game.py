@@ -20,9 +20,9 @@ clock = pygame.time.Clock()
 
 #create display surface 900 x 600
 
-#temporary dimensions for wall creating is 2496 x 1664
+#temporary dimensions for wall creating is 2496 x 1664      1920x1280
 
-screen = pygame.display.set_mode((2496,1664))
+screen = pygame.display.set_mode((1920,1280))
 screen_rect = screen.get_rect()
 
 pygame.display.set_caption('name work in progress')
@@ -35,8 +35,10 @@ class Player:
 
 #variables
 move = 5
-map_x = 540
-map_y = -50
+map_x = 960
+map_y = 600
+
+# 540, -50
 
 #player
 thief = Player(450, 300, 50, 50, 5) #x and y values are in the center but this places the thief 'top left' in the middle
@@ -44,7 +46,7 @@ thief.rect.center = screen_rect.center #puts player in the middle of the screen
  
 #floors
 floor_1_surface = pygame.image.load('floor_1.png').convert()
-floor_1_surface = pygame.transform.rotozoom(floor_1_surface, 0, 1.3)
+floor_1_surface = pygame.transform.rotozoom(floor_1_surface, 0, 1)
 floor_1_rect = floor_1_surface.get_rect(center = screen_rect.center) #initially puts center at the screen center
 
 #functions
@@ -73,6 +75,8 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(pygame.mouse.get_pos())
             
     map_y = player_movement_vert(map_y)
     map_x = player_movement_horz(map_x)
