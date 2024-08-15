@@ -33,6 +33,11 @@ class Player:
         self.rect = pygame.Rect(x, y, width, height)
         self.speed = speed
 
+class Wall:
+    def __init__(self,x,y, width, height):
+        self.rect = pygame.Rect(x,y,width,height)
+        
+
 #variables
 move = 5
 map_x = 960
@@ -48,6 +53,32 @@ thief.rect.center = screen_rect.center #puts player in the middle of the screen
 floor_1_surface = pygame.image.load('floor_1.png').convert()
 floor_1_surface = pygame.transform.rotozoom(floor_1_surface, 0, 1)
 floor_1_rect = floor_1_surface.get_rect(center = screen_rect.center) #initially puts center at the screen center
+
+#walls
+wall_list = []
+
+#library
+lib_top = wall_list.append(Wall(205,675,655-205,10))
+lib_right_top = wall_list.append(Wall(650,675,10,850-675))
+lib_right_bottom = wall_list.append(Wall(650,920,10,1030-920))
+
+#dining
+din_top = wall_list.append(Wall(210,195,560-205,10))
+din_lib_left = wall_list.append(Wall(205,200,10,1030-200))
+din_right_top = wall_list.append(Wall(555,195,10,530-195))
+din_right_bottom = wall_list.append(Wall(555,600,10,675-600))
+
+#cleaning room
+cleaning_left = wall_list.append(Wall(780,135,10,485-135))
+
+#kitchen
+kit_cle_bottom = wall_list.append(Wall(710,485,1020-710,10))
+kit_bottom_mid = wall_list.append(Wall(1090,485,1135-1090,10))
+#kit_left_top = 
+
+#stair walls
+stair_1_left = wall_list.append(Wall(800,485,10,725-485))
+stair_1_right = wall_list.append(Wall(960,485,10,725-485))
 
 #functions
 def player_movement_vert(y):
@@ -70,6 +101,10 @@ def player_movement_horz(x):
 
     return x
 
+def draw_walls(list):
+    for wall in list:
+        pygame.draw.rect(screen,(255,255,255),wall.rect)
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -86,7 +121,7 @@ while True:
     screen.fill((0,0,0))
     screen.blit(floor_1_surface,floor_1_rect)
     pygame.draw.rect(screen,(255,255,255),thief.rect)
-    
+    draw_walls(wall_list)
 
     pygame.display.update()
     clock.tick(60) #frame rate
