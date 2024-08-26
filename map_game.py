@@ -36,33 +36,43 @@ class Player:
         self.y = y
         self.moving = moving
         
-    def player_movement_vert(self,map_y,collide):
+    def player_movement_vert(self, collide):
         keys = pygame.key.get_pressed()
         self.moving = False
+        
+        if self.y < 150:
+            self.y = 150
+        if self.y > 450:
+            self.y = 450
         
         if collide == False:
             if keys[pygame.K_w]:
-                map_y += speed #directions are reversed to simulate the player moving in the map
+                self.y -= speed #directions are reversed to simulate the player moving in the map
                 self.moving = True
             if keys[pygame.K_s]:
-                map_y -= speed 
+                self.y += speed 
                 self.moving = True
         
-        return map_y
+        return self.y
  
-    def player_movement_horz(self,map_x,collide):
+    def player_movement_horz(self, collide):
         keys = pygame.key.get_pressed()
         self.moving = False
         
+        if self.x < 225:
+            self.x = 225
+        if self.x > 675:
+            self.x = 675
+             
         if collide == False:
             if keys[pygame.K_a]:
-                map_x += speed   
+                self.x -= speed   
                 self.moving = True
             if keys[pygame.K_d]:
-                map_x -= speed
+                self.x += speed
                 self.moving = True
 
-        return map_x
+        return self.x
     
     # def wall_collision(self,list,collide):
     #     for wall in list:
@@ -159,21 +169,21 @@ def draw_walls(list):
         #wall.move_wall(map_x, map_y,thief.moving)
         pygame.draw.rect(screen,(255,255,255),wall.rect)
 
-def movement(list,speed):
-    for wall in list:
-        keys = pygame.key.get_pressed()
+# def movement(list,speed):
+#     for wall in list:
+#         keys = pygame.key.get_pressed()
            
-        if keys[pygame.K_a]:
-            wall.rect.x += speed
+#         if keys[pygame.K_a]:
+#             wall.rect.x += speed
             
-        if keys[pygame.K_d]:
-            wall.rect.x -= speed
+#         if keys[pygame.K_d]:
+#             wall.rect.x -= speed
             
-        if keys[pygame.K_w]:
-            wall.rect.y += speed 
+#         if keys[pygame.K_w]:
+#             wall.rect.y += speed 
             
-        if keys[pygame.K_s]:
-            wall.rect.y -= speed
+#         if keys[pygame.K_s]:
+#             wall.rect.y -= speed
         
 
 #game loop
@@ -187,12 +197,12 @@ while True:
             
     # collide = Player.wall_collision(thief,wall_list,collide)      
 
-    map_y = Player.player_movement_vert(thief,map_y,collide)
-    map_x = Player.player_movement_horz(thief,map_x,collide)
+    thief.rect.centery = Player.player_movement_vert(thief, collide)
+    thief.rect.centerx = Player.player_movement_horz(thief, collide)
    
     # collide = Player.wall_collision(thief,wall_list,collide)  
     #collide = False
-    movement(wall_list,speed)
+    # movement(wall_list,speed)
     
     for wall in wall_list:
         collide = pygame.Rect.colliderect(thief.rect, wall.rect)
