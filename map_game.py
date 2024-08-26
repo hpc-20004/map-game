@@ -36,7 +36,7 @@ class Player:
         self.y = y
         self.moving = moving
         
-    def player_movement_vert(self, collide):
+    def player_movement_vert(self, collide, offset, map):
         keys = pygame.key.get_pressed()
         self.moving = False
         
@@ -47,15 +47,21 @@ class Player:
         
         if collide == False:
             if keys[pygame.K_w]:
+                if self.y == 150:
+                    offset -= speed
+                    map += speed
                 self.y -= speed #directions are reversed to simulate the player moving in the map
                 self.moving = True
             if keys[pygame.K_s]:
+                if self.y == 450:
+                    offset += speed
+                    map -= speed
                 self.y += speed 
                 self.moving = True
         
-        return self.y
+        return self.y, offset, map
  
-    def player_movement_horz(self, collide):
+    def player_movement_horz(self, collide, offset, map):
         keys = pygame.key.get_pressed()
         self.moving = False
         
@@ -66,13 +72,19 @@ class Player:
              
         if collide == False:
             if keys[pygame.K_a]:
+                if self.x == 225:
+                    offset -= speed
+                    map += speed
                 self.x -= speed   
                 self.moving = True
             if keys[pygame.K_d]:
+                if self.x == 675:
+                    offset += speed
+                    map -= speed
                 self.x += speed
                 self.moving = True
 
-        return self.x
+        return self.x, offset, map
     
     # def wall_collision(self,list,collide):
     #     for wall in list:
@@ -197,8 +209,8 @@ while True:
             
     # collide = Player.wall_collision(thief,wall_list,collide)      
 
-    thief.rect.centery = Player.player_movement_vert(thief, collide)
-    thief.rect.centerx = Player.player_movement_horz(thief, collide)
+    thief.rect.centery, center_offset_y, map_y = Player.player_movement_vert(thief, collide, center_offset_y,map_y)
+    thief.rect.centerx, center_offset_x, map_x = Player.player_movement_horz(thief, collide, center_offset_x,map_x)
    
     # collide = Player.wall_collision(thief,wall_list,collide)  
     #collide = False
