@@ -209,13 +209,13 @@ while True:
 
         if event.type == ANIMATION:
             if keys[pygame.K_w]:
-                thief_frame = (thief_frame - 1) % 3 + 6 
-            elif keys[pygame.K_s]:
-                thief_frame = (thief_frame + 1) % 3  
-            elif keys[pygame.K_a]:
-                thief_frame = (thief_frame + 1) % 3 + 3  
-            elif keys[pygame.K_d]:
+                thief_frame = (thief_frame - 1) % 3 
+            if keys[pygame.K_s]:
+                thief_frame = (thief_frame + 1) % 3 + 6
+            if keys[pygame.K_a]:
                 thief_frame = (thief_frame + 1) % 3 + 9  
+            if keys[pygame.K_d]:
+                thief_frame = (thief_frame + 1) % 3 + 3  
 
     moving = thief.player_movement(wall_list, map_offset)
 
