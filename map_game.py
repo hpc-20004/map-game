@@ -30,63 +30,51 @@ pygame.display.set_caption('name work in progress')
 
 #player class
 class Player:
-    def __init__(self,surface, x, y, width, height, speed,moving):
+    def __init__(self, surface, x, y, width, height, speed, moving):
         self.surface = surface
         self.rect = self.surface.get_rect()
         self.speed = speed
         self.rect.center = screen_rect.center
         self.moving = moving
 
-    def move(self, x, y, walls):
-        #move horizontally
-        self.rect.x += x
-        for wall in walls:
-            if self.moving:
-                if self.rect.colliderect(wall.rect):
-                    if x > 0:  #hit the left side of wall
-                        self.rect.right = wall.rect.left
-                    if x < 0:  #hit the right side of wall
-                        self.rect.left = wall.rect.right
-
-        #move vertically
-        self.rect.y += y
-        for wall in walls:
-            if self.moving:
-                if self.rect.colliderect(wall.rect):
-                    if y > 0:  #hit the top side of wall
-                        self.rect.bottom = wall.rect.top
-                    if y < 0:  #hit the bottom side of wall
-                        self.rect.top = wall.rect.bottom
-
     def player_movement(self, walls, map_offset):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         
         if keys[pygame.K_w]:
-            y = -self.speed #up
+            y = self.speed  # move map down
             self.moving = True
         if keys[pygame.K_s]:
-            y = self.speed #down
+            y = -self.speed  # move map up
             self.moving = True
         if keys[pygame.K_a]:
-            x = -self.speed #left
+            x = self.speed  # move map right
             self.moving = True
         if keys[pygame.K_d]:
-            x = self.speed #right
+            x = -self.speed  # move map left
             self.moving = True
 
-        #change player position and map offset based on player movement
-        if self.rect.left + x < 0 or self.rect.right + x > screen_rect.width:
-            map_offset[0] -= x
-        else:
-            self.move(x, 0, walls)
+        # Check for collisions and update the map offset
+        for wall in walls:
+            # Update wall positions based on the current offset
+            wall.update_position(map_offset[0] + x, map_offset[1] + y)
 
-        if self.rect.top + y < 0 or self.rect.bottom + y > screen_rect.height:
-            map_offset[1] -= y
-        else:
-            self.move(0, y, walls)
+            if self.rect.colliderect(wall.rect):  # Collision detected
+                if x > 0:  # moving right, push map back to the left
+                    x = 0
+                if x < 0:  # moving left, push map back to the right
+                    x = 0
+                if y > 0:  # moving down, push map back up
+                    y = 0
+                if y < 0:  # moving up, push map back down
+                    y = 0
+
+        # Update the map offset based on movement and collisions
+        map_offset[0] += x
+        map_offset[1] += y
 
         return self.moving
+
 
 #wall class
 class Wall:
@@ -106,7 +94,7 @@ class Wall:
 def draw_walls(list, map_x, map_y):
     for wall in list:
         wall.update_position(map_x, map_y)
-        pygame.draw.rect(screen, (255, 255, 255), wall.rect)
+        pygame.draw.rect(screen,(255, 255, 255,), wall.rect)
 
 #variables
 speed = 5
@@ -117,18 +105,27 @@ thief_frame = 0
 moving = False
 
 #player
-thief_sprites = [pygame.image.load('thief/tile000.png').convert(),
-                pygame.image.load('thief/tile001.png').convert(),
-                pygame.image.load('thief/tile002.png').convert(),
-                pygame.image.load('thief/tile003.png').convert(),
-                pygame.image.load('thief/tile004.png').convert(),
-                pygame.image.load('thief/tile005.png').convert(),
-                pygame.image.load('thief/tile006.png').convert(),
-                pygame.image.load('thief/tile007.png').convert(),
-                pygame.image.load('thief/tile008.png').convert(),
-                pygame.image.load('thief/tile009.png').convert(),
-                pygame.image.load('thief/tile010.png').convert(),
-                pygame.image.load('thief/tile011.png').convert()]
+thief_sprites = []
+for sprite in range(12):  #tile000.png to tile011.png
+    
+    #image name
+    sprite_file = f'thief/tile{sprite:03}.png'  #:03 so it has 3 digits
+        
+    #load
+    original_sprite = pygame.image.load(sprite_file).convert()
+        
+    #get sprite dimensions
+    original_width, original_height = original_sprite.get_size()
+        
+    #change ONLY height to 55px
+    new_height = 50
+    new_width = (50/original_height) * original_width
+    new_size = (new_width, new_height)
+        
+    resized_sprite = pygame.transform.scale(original_sprite, new_size)
+        
+    #append to sprite list
+    thief_sprites.append(resized_sprite)
 
 thief = Player(thief_sprites[8],450, 300, 50, 50, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
 # thief.rect.center = screen_rect.center
@@ -155,6 +152,11 @@ lib_right_top = wall_list.append(Wall(650 - center_offset_x, 675 - center_offset
 lib_right_bottom = wall_list.append(Wall(650 - center_offset_x, 920 - center_offset_y, 10, 1030-920))
 lib_bottom = wall_list.append(Wall(205 - center_offset_x, 1030 - center_offset_y, 685-205, 10))
 
+# furniture
+lib_couch = wall_list.append(Wall(465 - center_offset_x,820 - center_offset_y, 85, 5))
+lib_table = wall_list.append(Wall(485 - center_offset_x,880 - center_offset_y, 50,5))
+# lib_shelf = wall_list.append(Wall())
+
 #dining
 din_top = wall_list.append(Wall(210 - center_offset_x, 195 - center_offset_y, 560-205, 10))
 din_lib_left = wall_list.append(Wall(205 - center_offset_x, 200 - center_offset_y, 10, 1030-200))
@@ -173,6 +175,7 @@ kit_right_top = wall_list.append(Wall(1100 - center_offset_x, 135 - center_offse
 kit_liv_top = wall_list.append(Wall(1100 - center_offset_x, 260 - center_offset_y, 1645-1100, 10))
 kit_bottom_right = wall_list.append(Wall(1135 - center_offset_x, 710 - center_offset_y, 1365-1135, 10))
 kit_left_top = wall_list.append(Wall(1130 - center_offset_x, 485 - center_offset_y, 10, 565-485))
+kit_top = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 1100-780,10))
 kit_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 630 - center_offset_y, 10, 810-630))
 
 #living area
@@ -197,7 +200,7 @@ map_offset = [0, 0]
 #game loop
 while True:
     keys = pygame.key.get_pressed()
-    moving = False  #reset moving status before checking keys
+    moving = False  # reset moving status before checking keys
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -205,7 +208,7 @@ while True:
             sys.exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print(pygame.mouse.get_pos())  #for checking coordinates
+            print(pygame.mouse.get_pos())  # for checking coordinates
 
         if event.type == ANIMATION:
             if keys[pygame.K_w]:
@@ -219,14 +222,14 @@ while True:
 
     moving = thief.player_movement(wall_list, map_offset)
 
-    #update the current sprite based on the animation frame
+    # update the current sprite based on the animation frame
     current_sprite = thief_sprites[thief_frame]
     thief.surface = current_sprite
 
-    #update floor position
+    # update floor position
     floor_1_rect = floor_1_surface.get_rect(center=(map_x + map_offset[0], map_y + map_offset[1]))
 
-    #draw everything
+    # draw everything
     screen.fill((0, 0, 0))
     screen.blit(floor_1_surface, floor_1_rect)
     screen.blit(thief.surface, thief.rect)
@@ -234,5 +237,6 @@ while True:
     draw_walls(wall_list, map_offset[0], map_offset[1])
 
     pygame.display.update()
-    clock.tick(60)  #frame rate
+    clock.tick(60)  # frame rate
+
 
