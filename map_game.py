@@ -136,7 +136,7 @@ current_sprite = thief_sprites[8]
 tile_size = 20
 
 #floors
-floor_1_surface = pygame.image.load('floor_1.png').convert()
+floor_1_surface = pygame.image.load('floor 1.png').convert()
 floor_1_rect = floor_1_surface.get_rect(center = (540,-50)) #initially puts center at the screen center
 
 #screen's center offset
@@ -152,10 +152,18 @@ lib_right_top = wall_list.append(Wall(650 - center_offset_x, 675 - center_offset
 lib_right_bottom = wall_list.append(Wall(650 - center_offset_x, 920 - center_offset_y, 10, 1030-920))
 lib_bottom = wall_list.append(Wall(205 - center_offset_x, 1030 - center_offset_y, 685-205, 10))
 
-# furniture
+#       furniture
+#                       reading
 lib_couch = wall_list.append(Wall(465 - center_offset_x,820 - center_offset_y, 85, 5))
 lib_table = wall_list.append(Wall(485 - center_offset_x,880 - center_offset_y, 50,5))
-# lib_shelf = wall_list.append(Wall())
+lib_stool_1 = wall_list.append(Wall(530 - center_offset_x, 940 - center_offset_y, 15, 5))
+lib_stool_2 = wall_list.append(Wall(465 - center_offset_x, 940 - center_offset_y, 15, 5))
+lib_shelf = wall_list.append(Wall(215 - center_offset_x, 720 - center_offset_y,655-220, 5))
+#                       desk 
+lib_chair = wall_list.append(Wall(465-150 - center_offset_x, 840 - center_offset_y, 40, 5))
+lib_desk = wall_list.append(Wall(280 - center_offset_x, 884 - center_offset_y, 100, 10))
+lib_plant_top = wall_list.append(Wall(280-70 - center_offset_x, 884+90 - center_offset_y, 50, 5))
+lib_plant_right = wall_list.append(Wall(260 - center_offset_x, 884+90 - center_offset_y, 5, 50))
 
 #dining
 din_top = wall_list.append(Wall(210 - center_offset_x, 195 - center_offset_y, 560-205, 10))
@@ -183,6 +191,12 @@ living_left_top = wall_list.append(Wall(1355 - center_offset_x, 265 - center_off
 living_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 965 - center_offset_y, 10, 1030-965))
 living_right = wall_list.append(Wall(1645 - center_offset_x, 265 - center_offset_y, 10, 1030-265))
 living_bottom = wall_list.append(Wall(1105 - center_offset_x, 1030 - center_offset_y, 1645-1105, 10))
+
+#       furniture
+living_paintings = wall_list.append(Wall(1130 - center_offset_x, 740 - center_offset_y, 1360-1130, 5))
+conversation_pit_top = wall_list.append(Wall(1360 - center_offset_x, 840 - center_offset_y, 250, 5))
+conversation_pit_left = wall_list.append(Wall(1360 - center_offset_x, 915 - center_offset_y, 5, 55))
+con_stair = wall_list.append(Wall(1360 - center_offset_x, ))
 
 #foyer
 foyer_left = wall_list.append(Wall(685 - center_offset_x, 1030 - center_offset_y, 10, 1160-1030))
@@ -234,7 +248,7 @@ while True:
     screen.blit(floor_1_surface, floor_1_rect)
     screen.blit(thief.surface, thief.rect)
 
-    draw_walls(wall_list, map_offset[0], map_offset[1])
+    draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
     clock.tick(60)  # frame rate
