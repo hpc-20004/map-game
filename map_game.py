@@ -194,9 +194,18 @@ living_bottom = wall_list.append(Wall(1105 - center_offset_x, 1030 - center_offs
 
 #       furniture
 living_paintings = wall_list.append(Wall(1130 - center_offset_x, 740 - center_offset_y, 1360-1130, 5))
+fire_couch = wall_list.append(Wall(1510 - center_offset_x, 680 - center_offset_y, 105, 10))
+fireplace = wall_list.append(Wall(1510 - center_offset_x, 540 - center_offset_y, 95, 40))
+tv_couch = wall_list.append(Wall(1510-60 - center_offset_x, 540-95 - center_offset_y, 105, 10))
+tv_wall = wall_list.append(Wall(1100 - center_offset_x, 540-95-115 - center_offset_y, 1645-1100,5))
+#                   conversation pit
 conversation_pit_top = wall_list.append(Wall(1360 - center_offset_x, 840 - center_offset_y, 250, 5))
 conversation_pit_left = wall_list.append(Wall(1360 - center_offset_x, 915 - center_offset_y, 5, 55))
-con_stair = wall_list.append(Wall(1360 - center_offset_x, ))
+conversation_pit_stair = wall_list.append(Wall(1360 - center_offset_x, 915 - center_offset_y, 25, 5))
+conversation_pit_bottom = wall_list.append(Wall(1360 - center_offset_x, 970 - center_offset_y, 250, 5))
+conversation_pit_right = wall_list.append(Wall(1610 - center_offset_x, 840 - center_offset_y, 5, 130))
+con_table = wall_list.append(Wall(1450 - center_offset_x, 900 - center_offset_y, 80, 5))
+con_chair = wall_list.append(Wall(1590 - center_offset_x, 880 - center_offset_y, 15, 5))
 
 #foyer
 foyer_left = wall_list.append(Wall(685 - center_offset_x, 1030 - center_offset_y, 10, 1160-1030))
