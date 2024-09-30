@@ -170,11 +170,20 @@ din_top = wall_list.append(Wall(210 - center_offset_x, 195 - center_offset_y, 56
 din_lib_left = wall_list.append(Wall(205 - center_offset_x, 200 - center_offset_y, 10, 1030-200))
 din_right_top = wall_list.append(Wall(555 - center_offset_x, 195 - center_offset_y, 10, 530-195))
 din_right_bottom = wall_list.append(Wall(555 - center_offset_x, 600 - center_offset_y, 10, 675-600))
+#       furniture
+dining_wall = wall_list.append(Wall(210 - center_offset_x, 540-95-115-20-50+5 - center_offset_y, 560-205, 10))
+dining_chair_1 = wall_list.append(Wall(1100-190+5-120-50-180-240 - center_offset_x,540-95-115-20-50+50+70+50 - center_offset_y, 25,5))
+dining_table = wall_list.append(Wall(1100-190+5-120-50-180-275 - center_offset_x,540-95-115-20-50+50+70+70 - center_offset_y, 100,40))
+dining_chair_2 = wall_list.append(Wall(1100-190+5-120-50-180-240 - center_offset_x,540-95-115-20-50+50+70+50+80 - center_offset_y, 25,5))
 
 #cleaning room
 cleaning_right = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 10, 485-135))
 cleaning_top = wall_list.append(Wall(555 - center_offset_x, 260 - center_offset_y, 785-560, 10))
 cleaning_bottom_left = wall_list.append(Wall(560 - center_offset_x, 485 - center_offset_y, 640-560, 10))
+#       furniture
+cleaning_wall = wall_list.append(Wall(1100-190+5-120-50-180 - center_offset_x,540-95-115-20-50+50 - center_offset_y, 785-560,10))
+cleaning_bench_1 = wall_list.append(Wall(1100-190+5-120-50-180 - center_offset_x,540-95-115-20-50+50+70 - center_offset_y, 20,5))
+cleaning_bench_2 = wall_list.append(Wall(1100-190+5-120-50-180+120 - center_offset_x,540-95-115-20-50+50+70 - center_offset_y, 100,5))
 
 #kitchen
 kit_cle_bottom = wall_list.append(Wall(710 - center_offset_x, 485 - center_offset_y, 1020-710, 10))
@@ -185,6 +194,11 @@ kit_bottom_right = wall_list.append(Wall(1135 - center_offset_x, 710 - center_of
 kit_left_top = wall_list.append(Wall(1130 - center_offset_x, 485 - center_offset_y, 10, 565-485))
 kit_top = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 1100-780,10))
 kit_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 630 - center_offset_y, 10, 810-630))
+
+#       furniture
+kitchen_island = wall_list.append(Wall(1100-190+5 - center_offset_x, 540-95-115-20 - center_offset_y, 90, 5))
+fridge = wall_list.append(Wall(1100-190+5-120 - center_offset_x,540-95-115-20-50 - center_offset_y, 40, 40))
+kitchen_wall = wall_list.append(Wall(1100-190+5-120-10 - center_offset_x, 540-95-115-20-50-60 - center_offset_y,1100-780,10))
 
 #living area
 living_left_top = wall_list.append(Wall(1355 - center_offset_x, 265 - center_offset_y, 10, 715-265))
@@ -257,7 +271,7 @@ while True:
     screen.blit(floor_1_surface, floor_1_rect)
     screen.blit(thief.surface, thief.rect)
 
-    draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
+    # draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
     clock.tick(60)  # frame rate
