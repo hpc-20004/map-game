@@ -19,12 +19,12 @@ clock = pygame.time.Clock()
 
 #separate animation clock
 ANIMATION = pygame.USEREVENT
-pygame.time.set_timer(ANIMATION, 200)#rate
+pygame.time.set_timer(ANIMATION, 200)#  rate
 
 
 #create display surface 900 x 600
-screen = pygame.display.set_mode((900,600))
-screen_rect = screen.get_rect()
+SCREEN = pygame.display.set_mode((900,600))
+screen_rect = SCREEN.get_rect()
 
 pygame.display.set_caption('name work in progress')
 
@@ -36,46 +36,72 @@ class Player:
         self.speed = speed
         self.rect.center = screen_rect.center
         self.moving = moving
+        self.x = x 
+        self.y = y
 
     def player_movement(self, walls, map_offset):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         
         if keys[pygame.K_w]:
-            y = self.speed  # move map down
+            y = self.speed  #   move map down
             self.moving = True
         if keys[pygame.K_s]:
-            y = -self.speed  # move map up
+            y = -self.speed  #  move map up
             self.moving = True
         if keys[pygame.K_a]:
-            x = self.speed  # move map right
+            x = self.speed  #   move map right
             self.moving = True
         if keys[pygame.K_d]:
-            x = -self.speed  # move map left
+            x = -self.speed  #  move map left
             self.moving = True
+            
+        
 
-        # Check for collisions and update the map offset
+        #check for collisions and update the map offset
         for wall in walls:
-            # Update wall positions based on the current offset
+            #update wall positions based on the current offset
             wall.update_position(map_offset[0] + x, map_offset[1] + y)
 
-            if self.rect.colliderect(wall.rect):  # Collision detected
-                if x > 0:  # moving right, push map back to the left
+            if self.rect.colliderect(wall.rect):  #detect collisioms
+                if x > 0:  #    moving right, push map back to the left
                     x = 0
-                if x < 0:  # moving left, push map back to the right
+                if x < 0:  #    moving left, push map back to the right
                     x = 0
-                if y > 0:  # moving down, push map back up
+                if y > 0:  #    moving down, push map back up
                     y = 0
-                if y < 0:  # moving up, push map back down
+                if y < 0:  #    moving up, push map back down
                     y = 0
 
-        # Update the map offset based on movement and collisions
+        #change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
-
+        
+        # if -690 < map_offset[0] < -580 and 590 <= map_offset[1] <= 595:
+        #     if keys[pygame.K_c]:
+        #         print("tv found")
+                
         return self.moving
+    
+#test this. maybe find something that calculates the players distance from tv instead using coordinates
 
-
+#game item class
+class Item:
+    def __init__(self, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, found):
+        self.min_x_offset = min_x_offset
+        self.max_x_offset = max_x_offset
+        self.min_y_offset = min_y_offset
+        self.max_y_offset = max_y_offset
+        self.floor = floor # once floors are implemented in the find items method check if player's floor and item floor are the same
+        self.found = found
+        
+    def find_items(self, map_offset_x, map_offset_y):
+        keys = pygame.key.get_pressed() # to see if c gets pressed
+        
+        if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
+            if keys[pygame.K_c]:
+                print("{} found".format(self))
+                self.found = True
 #wall class
 class Wall:
     def __init__(self, x, y, width, height):
@@ -94,15 +120,26 @@ class Wall:
 def draw_walls(list, map_x, map_y):
     for wall in list:
         wall.update_position(map_x, map_y)
-        pygame.draw.rect(screen,(255, 255, 255,), wall.rect)
+        pygame.draw.rect(SCREEN,(255, 255, 255,), wall.rect)
 
 #variables
 speed = 5
-map_x = 540
-map_y = -50
+MAP_X = 540
+MAP_Y = -50
 collide = False
 thief_frame = 0
 moving = False
+
+#item list
+item_list = []
+
+book_item = Item(525,580,195,205,1,False)
+item_list.append(book_item)
+
+master_key_item = Item(265,285,545,600,1,False)
+item_list.append(master_key_item)
+
+tv_item = Item(-690,)
 
 #player
 thief_sprites = []
@@ -133,7 +170,7 @@ thief = Player(thief_sprites[8],450, 300, 50, 50, 5,moving) #x and y values are 
 current_sprite = thief_sprites[8]
 
 #set up tiles?
-tile_size = 20
+TILE_SIZE = 20
 
 #floors
 floor_1_surface = pygame.image.load('floor 1.png').convert()
@@ -151,7 +188,6 @@ lib_top = wall_list.append(Wall(205 - center_offset_x, 675 - center_offset_y, 65
 lib_right_top = wall_list.append(Wall(650 - center_offset_x, 675 - center_offset_y, 10, 850-675))
 lib_right_bottom = wall_list.append(Wall(650 - center_offset_x, 920 - center_offset_y, 10, 1030-920))
 lib_bottom = wall_list.append(Wall(205 - center_offset_x, 1030 - center_offset_y, 685-205, 10))
-
 #       furniture
 #                       reading
 lib_couch = wall_list.append(Wall(465 - center_offset_x,820 - center_offset_y, 85, 5))
@@ -165,6 +201,7 @@ lib_desk = wall_list.append(Wall(280 - center_offset_x, 884 - center_offset_y, 1
 lib_plant_top = wall_list.append(Wall(280-70 - center_offset_x, 884+90 - center_offset_y, 50, 5))
 lib_plant_right = wall_list.append(Wall(260 - center_offset_x, 884+90 - center_offset_y, 5, 50))
 
+
 #dining
 din_top = wall_list.append(Wall(210 - center_offset_x, 195 - center_offset_y, 560-205, 10))
 din_lib_left = wall_list.append(Wall(205 - center_offset_x, 200 - center_offset_y, 10, 1030-200))
@@ -176,6 +213,7 @@ dining_chair_1 = wall_list.append(Wall(1100-190+5-120-50-180-240 - center_offset
 dining_table = wall_list.append(Wall(1100-190+5-120-50-180-275 - center_offset_x,540-95-115-20-50+50+70+70 - center_offset_y, 100,40))
 dining_chair_2 = wall_list.append(Wall(1100-190+5-120-50-180-240 - center_offset_x,540-95-115-20-50+50+70+50+80 - center_offset_y, 25,5))
 
+
 #cleaning room
 cleaning_right = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 10, 485-135))
 cleaning_top = wall_list.append(Wall(555 - center_offset_x, 260 - center_offset_y, 785-560, 10))
@@ -185,33 +223,35 @@ cleaning_wall = wall_list.append(Wall(1100-190+5-120-50-180 - center_offset_x,54
 cleaning_bench_1 = wall_list.append(Wall(1100-190+5-120-50-180 - center_offset_x,540-95-115-20-50+50+70 - center_offset_y, 20,5))
 cleaning_bench_2 = wall_list.append(Wall(1100-190+5-120-50-180+120 - center_offset_x,540-95-115-20-50+50+70 - center_offset_y, 100,5))
 
+
 #kitchen
 kit_cle_bottom = wall_list.append(Wall(710 - center_offset_x, 485 - center_offset_y, 1020-710, 10))
 kit_bottom_mid = wall_list.append(Wall(1090 - center_offset_x, 485 - center_offset_y, 1135-1090, 10))
-kit_right_top = wall_list.append(Wall(1100 - center_offset_x, 135 - center_offset_y, 10, 265-135))
+kit_right_top = wall_list.append(Wall(1100 - center_offset_x, 135 - center_offset_y, 10, 265-100))
 kit_liv_top = wall_list.append(Wall(1100 - center_offset_x, 260 - center_offset_y, 1645-1100, 10))
 kit_bottom_right = wall_list.append(Wall(1135 - center_offset_x, 710 - center_offset_y, 1365-1135, 10))
 kit_left_top = wall_list.append(Wall(1130 - center_offset_x, 485 - center_offset_y, 10, 565-485))
 kit_top = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 1100-780,10))
 kit_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 630 - center_offset_y, 10, 810-630))
-
 #       furniture
 kitchen_island = wall_list.append(Wall(1100-190+5 - center_offset_x, 540-95-115-20 - center_offset_y, 90, 5))
 fridge = wall_list.append(Wall(1100-190+5-120 - center_offset_x,540-95-115-20-50 - center_offset_y, 40, 40))
 kitchen_wall = wall_list.append(Wall(1100-190+5-120-10 - center_offset_x, 540-95-115-20-50-60 - center_offset_y,1100-780,10))
+
 
 #living area
 living_left_top = wall_list.append(Wall(1355 - center_offset_x, 265 - center_offset_y, 10, 715-265))
 living_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 965 - center_offset_y, 10, 1030-965))
 living_right = wall_list.append(Wall(1645 - center_offset_x, 265 - center_offset_y, 10, 1030-265))
 living_bottom = wall_list.append(Wall(1105 - center_offset_x, 1030 - center_offset_y, 1645-1105, 10))
-
 #       furniture
 living_paintings = wall_list.append(Wall(1130 - center_offset_x, 740 - center_offset_y, 1360-1130, 5))
 fire_couch = wall_list.append(Wall(1510 - center_offset_x, 680 - center_offset_y, 105, 10))
 fireplace = wall_list.append(Wall(1510 - center_offset_x, 540 - center_offset_y, 95, 40))
 tv_couch = wall_list.append(Wall(1510-60 - center_offset_x, 540-95 - center_offset_y, 105, 10))
 tv_wall = wall_list.append(Wall(1100 - center_offset_x, 540-95-115 - center_offset_y, 1645-1100,5))
+tv = Wall(1455 - center_offset_x,330 - center_offset_y, 100, 10)
+wall_list.append(tv)
 #                   conversation pit
 conversation_pit_top = wall_list.append(Wall(1360 - center_offset_x, 840 - center_offset_y, 250, 5))
 conversation_pit_left = wall_list.append(Wall(1360 - center_offset_x, 915 - center_offset_y, 5, 55))
@@ -220,6 +260,7 @@ conversation_pit_bottom = wall_list.append(Wall(1360 - center_offset_x, 970 - ce
 conversation_pit_right = wall_list.append(Wall(1610 - center_offset_x, 840 - center_offset_y, 5, 130))
 con_table = wall_list.append(Wall(1450 - center_offset_x, 900 - center_offset_y, 80, 5))
 con_chair = wall_list.append(Wall(1590 - center_offset_x, 880 - center_offset_y, 15, 5))
+
 
 #foyer
 foyer_left = wall_list.append(Wall(685 - center_offset_x, 1030 - center_offset_y, 10, 1160-1030))
@@ -232,7 +273,7 @@ stair_1_left = wall_list.append(Wall(800 - center_offset_x, 485 - center_offset_
 stair_1_right = wall_list.append(Wall(960 - center_offset_x, 485 - center_offset_y, 10, 725-485))
 
 #starting map offset
-map_offset = [0, 0] 
+map_offset = [0, 0]  #x offset, y offset
 
 #game loop
 while True:
@@ -246,6 +287,8 @@ while True:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             print(pygame.mouse.get_pos())  # for checking coordinates
+            print(map_offset[0])
+            print(map_offset[1])
 
         if event.type == ANIMATION:
             if keys[pygame.K_w]:
@@ -258,20 +301,24 @@ while True:
                 thief_frame = (thief_frame + 1) % 3 + 3  
 
     moving = thief.player_movement(wall_list, map_offset)
+    
+    for item in item_list:
+        item.find_items(map_offset[0],map_offset[1])
+    
 
     # update the current sprite based on the animation frame
     current_sprite = thief_sprites[thief_frame]
     thief.surface = current_sprite
 
     # update floor position
-    floor_1_rect = floor_1_surface.get_rect(center=(map_x + map_offset[0], map_y + map_offset[1]))
+    floor_1_rect = floor_1_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
 
     # draw everything
-    screen.fill((0, 0, 0))
-    screen.blit(floor_1_surface, floor_1_rect)
-    screen.blit(thief.surface, thief.rect)
+    SCREEN.fill((0, 0, 0))
+    SCREEN.blit(floor_1_surface, floor_1_rect)
+    SCREEN.blit(thief.surface, thief.rect)
 
-    # draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
+    draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
     clock.tick(60)  # frame rate
