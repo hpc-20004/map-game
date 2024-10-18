@@ -89,5 +89,7 @@ def create_walls(Wall, center_offset_x, center_offset_y):
   #stair walls
   stair_1_left = wall_list.append(Wall(800 - center_offset_x, 485 - center_offset_y, 10, 725-485))
   stair_1_right = wall_list.append(Wall(960 - center_offset_x, 485 - center_offset_y, 10, 725-485))
+  stair_1_top = Wall(800 - center_offset_x, 490 - center_offset_y, 160, 10)
+  stair_1_top_list = wall_list.append(stair_1_top)
 
-  return wall_list
+  return wall_list, stair_1_top

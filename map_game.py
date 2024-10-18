@@ -163,6 +163,7 @@ item_list.append(tv_item)
 #room list
 room_list = []
 
+# floor 1
 foyer = Room("Foyer",-240,285,-180,410,1,False,False)
 room_list.append(foyer)
 
@@ -174,6 +175,18 @@ room_list.append(dining)
 
 cleaning = Room("Cleaning Supplies Closet",110,285,495,610,1,False,False)
 room_list.append(cleaning)
+
+#   L shaped rooms are  
+kitchen_left = Room("Kitchen",-265,60,495,720,1,False,False)
+kitchen_right = Room("Kitchen",-465,-266,270,595,1,False,False)
+room_list.append(kitchen_left)
+room_list.append(kitchen_right)
+
+living_left = Room("Living Room",-514,-290,-50,185,1,False,False)
+living_right = Room("Living Room",-755,-515,-50,595,1,False,False)
+room_list.append(living_left)
+room_list.append(living_right)
+
 
 #player
 THIEF_SPRITES = []
@@ -208,14 +221,18 @@ TILE_SIZE = 20
 
 #floors
 floor_1_surface = pygame.image.load('floor 1.png').convert()
-floor_1_rect = floor_1_surface.get_rect(center = (540,-50)) #initially puts center at the screen center
+floor_2_surface = pygame.image.load('floor 2.png').convert()
+floor_3_surface = pygame.image.load('floor 3.png').convert()
+
+floor_shown_surface = floor_1_surface #  starts at floor 1 
+floor_rect = floor_shown_surface.get_rect(center = (540,-50)) # initially puts center at the entrance
 
 #screen's center offset
 CENTER_OFFSET_X = screen_rect.centerx -30
 CENTER_OFFSET_Y = screen_rect.centery +355
 
 #walls (relative to the center of the screen)
-wall_list = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y)
+wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y)
 
 #starting map offset
 map_offset = [0, 0]  #x offset, y offset
@@ -236,7 +253,7 @@ while True:
             print(map_offset[1])
             print(player_location)
 
-        if event.type == ANIMATION:
+        if event.type == ANIMATION: #   animation
             if keys[pygame.K_w]:
                 thief_frame = (thief_frame - 1) % 3 
             if keys[pygame.K_s]:
@@ -245,6 +262,12 @@ while True:
                 thief_frame = (thief_frame + 1) % 3 + 9  
             if keys[pygame.K_d]:
                 thief_frame = (thief_frame + 1) % 3 + 3  
+        if event.type == pygame.KEYDOWN: #testing floors
+            if event.key == pygame.K_SPACE:
+                if floor_shown_surface == floor_1_surface:
+                    floor_shown_surface = floor_2_surface  
+                else:
+                    floor_shown_surface = floor_1_surface 
 
     moving = thief.player_movement(wall_list, map_offset)
     
@@ -261,12 +284,15 @@ while True:
     current_sprite = THIEF_SPRITES[thief_frame]
     thief.surface = current_sprite
 
-    # update floor position
-    floor_1_rect = floor_1_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
+    # update floor position and floor
+    floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
+    
+    if thief.rect.colliderect(stair_1_top.rect):
+        floor_shown_surface = floor_2_surface
 
     # draw everything
     SCREEN.fill((0, 0, 0))
-    SCREEN.blit(floor_1_surface, floor_1_rect)
+    SCREEN.blit(floor_shown_surface, floor_rect)
     SCREEN.blit(thief.surface, thief.rect)
 
     draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
