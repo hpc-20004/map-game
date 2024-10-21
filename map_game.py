@@ -121,23 +121,35 @@ class Room:
 
 #wall class
 class Wall:
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, floor):
         self.original_x = x
         self.original_y = y
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
+        self.floor = floor
 
     def update_position(self, map_x, map_y):
         #update wall's position based on map's position
         self.rect.x = self.original_x + map_x
         self.rect.y = self.original_y + map_y
+        
+            
+    def draw(self, surface, map_x, map_y, current_floor,list):
+        #update position before drawing
+        self.update_position(map_x, map_y)
+        
+        if self.floor == current_floor:
+            list.append(self)
+        else:
+            list.remove(self)
+            
+        pygame.draw.rect(surface, (255, 255, 255), self.rect)
 
 #draw walls
-def draw_walls(list, map_x, map_y):
-    for wall in list:
-        wall.update_position(map_x, map_y)
-        pygame.draw.rect(SCREEN,(255, 255, 255,), wall.rect)
+def draw_walls(wall_list, surface, map_x, map_y, current_floor):
+    for wall in wall_list:
+        wall.draw(surface, map_x, map_y, current_floor, wall_list)
 
 #variables
 speed = 5
@@ -147,6 +159,7 @@ collide = False
 thief_frame = 0
 moving = False
 player_location = 0
+current_floor = 1 # player starts at ground level
 
 #item list
 item_list = []
@@ -279,6 +292,13 @@ while True:
     for room in room_list:
         player_location = room.check_room_location(map_offset[0],map_offset[1],player_location)
         
+    #check what floor the player's in
+    if floor_shown_surface == floor_1_surface:
+        current_floor = 1
+    elif floor_shown_surface == floor_2_surface:
+        current_floor = 2
+    elif floor_shown_surface == floor_3_surface:
+        current_floor = 3
 
     # update the current sprite based on the animation frame
     current_sprite = THIEF_SPRITES[thief_frame]
@@ -295,9 +315,10 @@ while True:
     SCREEN.blit(floor_shown_surface, floor_rect)
     SCREEN.blit(thief.surface, thief.rect)
 
-    draw_walls(wall_list, map_offset[0], map_offset[1]) #get rid of this to make the walls invisible eventually
+    draw_walls(wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
     clock.tick(60)  # frame rate
+    
 
 
