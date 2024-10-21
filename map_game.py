@@ -139,17 +139,12 @@ class Wall:
         #update position before drawing
         self.update_position(map_x, map_y)
         
-        if self.floor == current_floor:
-            list.append(self)
-        else:
-            list.remove(self)
-            
         pygame.draw.rect(surface, (255, 255, 255), self.rect)
 
 #draw walls
-def draw_walls(wall_list, surface, map_x, map_y, current_floor):
-    for wall in wall_list:
-        wall.draw(surface, map_x, map_y, current_floor, wall_list)
+def draw_walls(current_wall_list, surface, map_x, map_y, current_floor):
+    for wall in current_wall_list:
+        wall.draw(surface, map_x, map_y, current_floor, current_wall_list)
 
 #variables
 speed = 5
@@ -245,7 +240,7 @@ CENTER_OFFSET_X = screen_rect.centerx -30
 CENTER_OFFSET_Y = screen_rect.centery +355
 
 #walls (relative to the center of the screen)
-wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y)
+current_wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
 
 #starting map offset
 map_offset = [0, 0]  #x offset, y offset
@@ -282,7 +277,7 @@ while True:
                 else:
                     floor_shown_surface = floor_1_surface 
 
-    moving = thief.player_movement(wall_list, map_offset)
+    moving = thief.player_movement(current_wall_list, map_offset)
     
     #check if any items are found
     for item in item_list:
@@ -315,7 +310,8 @@ while True:
     SCREEN.blit(floor_shown_surface, floor_rect)
     SCREEN.blit(thief.surface, thief.rect)
 
-    draw_walls(wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
+    current_wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+    draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
     clock.tick(60)  # frame rate
