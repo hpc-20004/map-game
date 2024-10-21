@@ -11,205 +11,314 @@ Python: 3.11
 
 #imports
 import pygame, sys
-
 from pygame.locals import QUIT
+from walls import create_walls
 
 #setup
 pygame.init()
 clock = pygame.time.Clock()
 
+#separate animation clock
+ANIMATION = pygame.USEREVENT
+pygame.time.set_timer(ANIMATION, 200)#  rate
+
+
 #create display surface 900 x 600
-
-#temporary dimensions for wall creating is 2496 x 1664      1920x1280
-
-screen = pygame.display.set_mode((900,600))
-screen_rect = screen.get_rect()
+SCREEN = pygame.display.set_mode((900,600))
+screen_rect = SCREEN.get_rect()
 
 pygame.display.set_caption('name work in progress')
 
-#Player class
+#player class
 class Player:
-    def __init__(self, x, y, width, height, speed,moving):
-        self.rect = pygame.Rect(x, y, width, height)
+    def __init__(self, surface, x, y, width, height, speed, moving):
+        self.surface = surface
+        self.rect = self.surface.get_rect()
         self.speed = speed
-        self.x = x
-        self.y = y
+        self.rect.center = screen_rect.center
         self.moving = moving
-        
-    def player_movement_vert(self,map_y,collide):
-        keys = pygame.key.get_pressed()
-        self.moving = False
-        
-        if collide == False:
-            if keys[pygame.K_w]:
-                map_y += speed #directions are reversed to simulate the player moving in the map
-                self.moving = True
-            if keys[pygame.K_s]:
-                map_y -= speed 
-                self.moving = True
-        
-        return map_y
- 
-    def player_movement_horz(self,map_x,collide):
-        keys = pygame.key.get_pressed()
-        self.moving = False
-        
-        if collide == False:
-            if keys[pygame.K_a]:
-                map_x += speed   
-                self.moving = True
-            if keys[pygame.K_d]:
-                map_x -= speed
-                self.moving = True
+        self.x = x 
+        self.y = y
 
-        return map_x
-    
-    # def wall_collision(self,list,collide):
-    #     for wall in list:
-    #         collide = pygame.Rect.colliderect(self.rect, wall.rect)
-    #         if collide:
-    #             print('collide')    
-    #         return collide
+    def player_movement(self, walls, map_offset):
+        keys = pygame.key.get_pressed()
+        x, y = 0, 0
+        
+        if keys[pygame.K_w]:
+            y = self.speed  #   move map down
+            self.moving = True
+        if keys[pygame.K_s]:
+            y = -self.speed  #  move map up
+            self.moving = True
+        if keys[pygame.K_a]:
+            x = self.speed  #   move map right
+            self.moving = True
+        if keys[pygame.K_d]:
+            x = -self.speed  #  move map left
+            self.moving = True
             
+        
+
+        #check for collisions and update the map offset
+        for wall in walls:
+            #update wall positions based on the current offset
+            wall.update_position(map_offset[0] + x, map_offset[1] + y)
+
+            if self.rect.colliderect(wall.rect):  #detect collisioms
+                if x > 0:  #    moving right, push map back to the left
+                    x = 0
+                if x < 0:  #    moving left, push map back to the right
+                    x = 0
+                if y > 0:  #    moving down, push map back up
+                    y = 0
+                if y < 0:  #    moving up, push map back down
+                    y = 0
+
+        #change the offset based on how the map has moved
+        map_offset[0] += x
+        map_offset[1] += y
+        
+        return self.moving
+    
+#game item class
+class Item:
+    def __init__(self, name, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, found):
+        self.name = name
+        self.min_x_offset = min_x_offset
+        self.max_x_offset = max_x_offset
+        self.min_y_offset = min_y_offset
+        self.max_y_offset = max_y_offset
+        self.floor = floor # once floors are implemented in the find items method check if player's floor and item floor are the same
+        self.found = found
+        
+    def find_items(self, map_offset_x, map_offset_y):
+        keys = pygame.key.get_pressed() # to see if c gets pressed
+        
+        if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
+            if keys[pygame.K_c]:
+                print("{} found".format(self.name))
+                self.found = True
+                
+#room class
+class Room:
+    def __init__(self, name, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, locked, in_room):
+        self.name = name
+        self.min_x_offset = min_x_offset
+        self.max_x_offset = max_x_offset
+        self.min_y_offset = min_y_offset
+        self.max_y_offset = max_y_offset
+        self.floor = floor # once floors are implemented in the find items method check if player's floor and room floor are the same
+        self.locked = locked
+        self.in_room = in_room
+        
+    def check_room_location(self, map_offset_x, map_offset_y, previous_player_location):
+        if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
+            self.in_room = True
+            return self.name
+        else:
+            self.in_room = False
+            return previous_player_location # if they're still in the same room?
 
 #wall class
 class Wall:
-    def __init__(self,x,y, width, height):
-        self.rect = pygame.Rect(x,y,width,height)
-        self.x = x
-        self.y = y
+    def __init__(self, x, y, width, height, floor):
+        self.original_x = x
+        self.original_y = y
+        self.width = width
+        self.height = height
+        self.rect = pygame.Rect(x, y, width, height)
+        self.floor = floor
+
+    def update_position(self, map_x, map_y):
+        #update wall's position based on map's position
+        self.rect.x = self.original_x + map_x
+        self.rect.y = self.original_y + map_y
         
-    # def move_wall(self, map_x, map_y, moving):
-    #     if moving == True:
-    #         self.rect.x = map_x
-    #         self.rect.y = map_y
+            
+    def draw(self, surface, map_x, map_y, current_floor,list):
+        #update position before drawing
+        self.update_position(map_x, map_y)
         
+        if self.floor == current_floor:
+            list.append(self)
+        else:
+            list.remove(self)
+            
+        pygame.draw.rect(surface, (255, 255, 255), self.rect)
+
+#draw walls
+def draw_walls(wall_list, surface, map_x, map_y, current_floor):
+    for wall in wall_list:
+        wall.draw(surface, map_x, map_y, current_floor, wall_list)
 
 #variables
 speed = 5
-map_x = 540
-map_y = -50
+MAP_X = 540
+MAP_Y = -50
 collide = False
+thief_frame = 0
+moving = False
+player_location = 0
+current_floor = 1 # player starts at ground level
 
-# 540, -50
+#item list
+item_list = []
+
+book_item = Item("The Great Gutsby", 525,580,195,205,1,False)
+item_list.append(book_item)
+
+master_key_item = Item("Master Bedroom Key",265,285,545,600,1,False)
+item_list.append(master_key_item)
+
+tv_item = Item("TV",-690,-580,590,595,1,False)
+item_list.append(tv_item)
+
+#room list
+room_list = []
+
+# floor 1
+foyer = Room("Foyer",-240,285,-180,410,1,False,False)
+room_list.append(foyer)
+
+library = Room("Library",240,635,-50,205,1,False,False)
+room_list.append(library)
+
+dining = Room("Dining Room",335,635,305,655,1,False,False)
+room_list.append(dining)
+
+cleaning = Room("Cleaning Supplies Closet",110,285,495,610,1,False,False)
+room_list.append(cleaning)
+
+#   L shaped rooms are  
+kitchen_left = Room("Kitchen",-265,60,495,720,1,False,False)
+kitchen_right = Room("Kitchen",-465,-266,270,595,1,False,False)
+room_list.append(kitchen_left)
+room_list.append(kitchen_right)
+
+living_left = Room("Living Room",-514,-290,-50,185,1,False,False)
+living_right = Room("Living Room",-755,-515,-50,595,1,False,False)
+room_list.append(living_left)
+room_list.append(living_right)
+
 
 #player
-thief = Player(450, 300, 50, 50, 5,False) #x and y values are in the center but this places the thief 'top left' in the middle
-thief.rect.center = screen_rect.center #puts player in the middle of the screen
- 
+THIEF_SPRITES = []
+for sprite in range(12):  #tile000.png to tile011.png
+    
+    #image name
+    sprite_file = f'thief/tile{sprite:03}.png'  #:03 so it has 3 digits
+        
+    #load
+    original_sprite = pygame.image.load(sprite_file).convert()
+        
+    #get sprite dimensions
+    original_width, original_height = original_sprite.get_size()
+        
+    #change ONLY height to 55px
+    new_height = 50
+    new_width = (50/original_height) * original_width
+    new_size = (new_width, new_height)
+        
+    resized_sprite = pygame.transform.scale(original_sprite, new_size)
+        
+    #append to sprite list
+    THIEF_SPRITES.append(resized_sprite)
+
+thief = Player(THIEF_SPRITES[8],450, 300, 50, 50, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
+# thief.rect.center = screen_rect.center
+
+current_sprite = THIEF_SPRITES[8]
+
+#set up tiles?
+TILE_SIZE = 20
+
 #floors
-floor_1_surface = pygame.image.load('floor_1.png').convert()
-# floor_1_surface = pygame.transform.rotozoom(floor_1_surface, 0, 1)
-floor_1_rect = floor_1_surface.get_rect(center = (540,-50)) #initially puts center at the screen center
+floor_1_surface = pygame.image.load('floor 1.png').convert()
+floor_2_surface = pygame.image.load('floor 2.png').convert()
+floor_3_surface = pygame.image.load('floor 3.png').convert()
+
+floor_shown_surface = floor_1_surface #  starts at floor 1 
+floor_rect = floor_shown_surface.get_rect(center = (540,-50)) # initially puts center at the entrance
 
 #screen's center offset
-center_offset_x = screen_rect.centerx - 30
-center_offset_y = screen_rect.centery +355
+CENTER_OFFSET_X = screen_rect.centerx -30
+CENTER_OFFSET_Y = screen_rect.centery +355
 
 #walls (relative to the center of the screen)
-wall_list = []
+wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y)
 
-#library
-lib_top = wall_list.append(Wall(205 - center_offset_x, 675 - center_offset_y, 655-205, 10))
-lib_right_top = wall_list.append(Wall(650 - center_offset_x, 675 - center_offset_y, 10, 850-675))
-lib_right_bottom = wall_list.append(Wall(650 - center_offset_x, 920 - center_offset_y, 10, 1030-920))
-lib_bottom = wall_list.append(Wall(205 - center_offset_x, 1030 - center_offset_y, 685-205, 10))
-
-#dining
-din_top = wall_list.append(Wall(210 - center_offset_x, 195 - center_offset_y, 560-205, 10))
-din_lib_left = wall_list.append(Wall(205 - center_offset_x, 200 - center_offset_y, 10, 1030-200))
-din_right_top = wall_list.append(Wall(555 - center_offset_x, 195 - center_offset_y, 10, 530-195))
-din_right_bottom = wall_list.append(Wall(555 - center_offset_x, 600 - center_offset_y, 10, 675-600))
-
-#cleaning room
-cleaning_right = wall_list.append(Wall(780 - center_offset_x, 135 - center_offset_y, 10, 485-135))
-cleaning_top = wall_list.append(Wall(555 - center_offset_x, 260 - center_offset_y, 785-560, 10))
-cleaning_bottom_left = wall_list.append(Wall(560 - center_offset_x, 485 - center_offset_y, 640-560, 10))
-
-#kitchen
-kit_cle_bottom = wall_list.append(Wall(710 - center_offset_x, 485 - center_offset_y, 1020-710, 10))
-kit_bottom_mid = wall_list.append(Wall(1090 - center_offset_x, 485 - center_offset_y, 1135-1090, 10))
-kit_right_top = wall_list.append(Wall(1100 - center_offset_x, 135 - center_offset_y, 10, 265-135))
-kit_liv_top = wall_list.append(Wall(1100 - center_offset_x, 260 - center_offset_y, 1645-1100, 10))
-kit_bottom_right = wall_list.append(Wall(1135 - center_offset_x, 710 - center_offset_y, 1365-1135, 10))
-kit_left_top = wall_list.append(Wall(1130 - center_offset_x, 485 - center_offset_y, 10, 565-485))
-kit_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 630 - center_offset_y, 10, 810-630))
-
-#living area
-living_left_top = wall_list.append(Wall(1355 - center_offset_x, 265 - center_offset_y, 10, 715-265))
-living_left_bottom = wall_list.append(Wall(1130 - center_offset_x, 965 - center_offset_y, 10, 1030-965))
-living_right = wall_list.append(Wall(1645 - center_offset_x, 265 - center_offset_y, 10, 1030-265))
-living_bottom = wall_list.append(Wall(1105 - center_offset_x, 1030 - center_offset_y, 1645-1105, 10))
-
-#foyer
-foyer_left = wall_list.append(Wall(685 - center_offset_x, 1030 - center_offset_y, 10, 1160-1030))
-foyer_right = wall_list.append(Wall(1105 - center_offset_x, 1030 - center_offset_y, 10, 1160-1030))
-foyer_bottom_left = wall_list.append(Wall(685 - center_offset_x, 1160 - center_offset_y, 860-685, 10))
-foyer_bottom_right = wall_list.append(Wall(925 - center_offset_x, 1160 - center_offset_y, 1105-925, 10))
-
-#stair walls
-stair_1_left = wall_list.append(Wall(800 - center_offset_x, 485 - center_offset_y, 10, 725-485))
-stair_1_right = wall_list.append(Wall(960 - center_offset_x, 485 - center_offset_y, 10, 725-485))
-
-
-#functions
-
-def draw_walls(list):
-    for wall in list:
-        #wall.move_wall(map_x, map_y,thief.moving)
-        pygame.draw.rect(screen,(255,255,255),wall.rect)
-
-def movement(list,speed):
-    for wall in list:
-        keys = pygame.key.get_pressed()
-           
-        if keys[pygame.K_a]:
-            wall.rect.x += speed
-            
-        if keys[pygame.K_d]:
-            wall.rect.x -= speed
-            
-        if keys[pygame.K_w]:
-            wall.rect.y += speed 
-            
-        if keys[pygame.K_s]:
-            wall.rect.y -= speed
-        
+#starting map offset
+map_offset = [0, 0]  #x offset, y offset
 
 #game loop
 while True:
+    keys = pygame.key.get_pressed()
+    moving = False  # reset moving status before checking keys
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print(pygame.mouse.get_pos())
-            
-    # collide = Player.wall_collision(thief,wall_list,collide)      
 
-    map_y = Player.player_movement_vert(thief,map_y,collide)
-    map_x = Player.player_movement_horz(thief,map_x,collide)
-   
-    # collide = Player.wall_collision(thief,wall_list,collide)  
-    #collide = False
-    movement(wall_list,speed)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(pygame.mouse.get_pos())  # for checking coordinates
+            print(map_offset[0])
+            print(map_offset[1])
+            print(player_location)
+
+        if event.type == ANIMATION: #   animation
+            if keys[pygame.K_w]:
+                thief_frame = (thief_frame - 1) % 3 
+            if keys[pygame.K_s]:
+                thief_frame = (thief_frame + 1) % 3 + 6
+            if keys[pygame.K_a]:
+                thief_frame = (thief_frame + 1) % 3 + 9  
+            if keys[pygame.K_d]:
+                thief_frame = (thief_frame + 1) % 3 + 3  
+        if event.type == pygame.KEYDOWN: #testing floors
+            if event.key == pygame.K_SPACE:
+                if floor_shown_surface == floor_1_surface:
+                    floor_shown_surface = floor_2_surface  
+                else:
+                    floor_shown_surface = floor_1_surface 
+
+    moving = thief.player_movement(wall_list, map_offset)
     
-    for wall in wall_list:
-        collide = pygame.Rect.colliderect(thief.rect, wall.rect)
-        if collide:
-            print('collide')   
-   
-            speed = 0
-        else:
-            speed = 5
+    #check if any items are found
+    for item in item_list:
+        item.find_items(map_offset[0],map_offset[1])
+        
+    #check what room the player's in
+    for room in room_list:
+        player_location = room.check_room_location(map_offset[0],map_offset[1],player_location)
+        
+    #check what floor the player's in
+    if floor_shown_surface == floor_1_surface:
+        current_floor = 1
+    elif floor_shown_surface == floor_2_surface:
+        current_floor = 2
+    elif floor_shown_surface == floor_3_surface:
+        current_floor = 3
+
+    # update the current sprite based on the animation frame
+    current_sprite = THIEF_SPRITES[thief_frame]
+    thief.surface = current_sprite
+
+    # update floor position and floor
+    floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
     
-    floor_1_rect = floor_1_surface.get_rect(center=(map_x,map_y))
-    
-    screen.fill((0,0,0))
-    screen.blit(floor_1_surface,floor_1_rect)
-    pygame.draw.rect(screen,(255,255,255),thief.rect)
-    
-    draw_walls(wall_list) 
+    if thief.rect.colliderect(stair_1_top.rect):
+        floor_shown_surface = floor_2_surface
+
+    # draw everything
+    SCREEN.fill((0, 0, 0))
+    SCREEN.blit(floor_shown_surface, floor_rect)
+    SCREEN.blit(thief.surface, thief.rect)
+
+    draw_walls(wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
-    clock.tick(60) #frame rate
+    clock.tick(60)  # frame rate
+    
+
+
