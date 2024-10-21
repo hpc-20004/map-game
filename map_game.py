@@ -27,7 +27,7 @@ pygame.time.set_timer(ANIMATION, 200)#  rate
 SCREEN = pygame.display.set_mode((900,600))
 screen_rect = SCREEN.get_rect()
 
-pygame.display.set_caption('name work in progress')
+pygame.display.set_caption("Thief's Gambit")
 
 #player class
 class Player:
@@ -111,23 +111,27 @@ class Room:
         self.locked = locked
         self.in_room = in_room
         
-    def check_room_location(self, map_offset_x, map_offset_y, previous_player_location):
+    def check_room_location(self, map_offset_x, map_offset_y, previous_player_location, current_floor):
         if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
-            self.in_room = True
-            return self.name
+            if self.floor == current_floor:
+                self.in_room = True
+                return self.name
+            # else:
+            #     self.in_room = False
+            #     return previous_player_location
+                
         else:
             self.in_room = False
             return previous_player_location # if they're still in the same room?
 
 #wall class
 class Wall:
-    def __init__(self, x, y, width, height, floor):
+    def __init__(self, x, y, width, height):
         self.original_x = x
         self.original_y = y
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
-        self.floor = floor
 
     def update_position(self, map_x, map_y):
         #update wall's position based on map's position
@@ -196,6 +200,10 @@ room_list.append(living_left)
 room_list.append(living_right)
 
 
+# FLoor 2
+ensuite = Room("Ensuite",510,640,375,300,2,True,False)
+room_list.append(ensuite)
+
 #player
 THIEF_SPRITES = []
 for sprite in range(12):  #tile000.png to tile011.png
@@ -240,7 +248,7 @@ CENTER_OFFSET_X = screen_rect.centerx -30
 CENTER_OFFSET_Y = screen_rect.centery +355
 
 #walls (relative to the center of the screen)
-current_wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+current_wall_list, stair_1_top, stair_2_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
 
 #starting map offset
 map_offset = [0, 0]  #x offset, y offset
@@ -260,6 +268,7 @@ while True:
             print(map_offset[0])
             print(map_offset[1])
             print(player_location)
+            print("current floor {}".format(current_floor))
 
         if event.type == ANIMATION: #   animation
             if keys[pygame.K_w]:
@@ -285,7 +294,7 @@ while True:
         
     #check what room the player's in
     for room in room_list:
-        player_location = room.check_room_location(map_offset[0],map_offset[1],player_location)
+        player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
         
     #check what floor the player's in
     if floor_shown_surface == floor_1_surface:
@@ -310,7 +319,7 @@ while True:
     SCREEN.blit(floor_shown_surface, floor_rect)
     SCREEN.blit(thief.surface, thief.rect)
 
-    current_wall_list, stair_1_top = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+    current_wall_list, stair_1_top, stair_2_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
     draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()
