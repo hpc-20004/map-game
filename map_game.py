@@ -248,9 +248,10 @@ CENTER_OFFSET_X = screen_rect.centerx -30
 CENTER_OFFSET_Y = screen_rect.centery +355
 
 #walls (relative to the center of the screen)
-current_wall_list, stair_1_top, stair_2_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
 
 #starting map offset
+map_offset = [0, 0]  #x offset, y offset
 map_offset = [0, 0]  #x offset, y offset
 
 #game loop
@@ -280,11 +281,14 @@ while True:
             if keys[pygame.K_d]:
                 thief_frame = (thief_frame + 1) % 3 + 3  
         if event.type == pygame.KEYDOWN: #testing floors
-            if event.key == pygame.K_SPACE:
-                if floor_shown_surface == floor_1_surface:
-                    floor_shown_surface = floor_2_surface  
-                else:
-                    floor_shown_surface = floor_1_surface 
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_1]:
+                floor_shown_surface = floor_1_surface
+            if keys[pygame.K_2]:
+                floor_shown_surface = floor_2_surface
+            if keys[pygame.K_3]:
+                floor_shown_surface = floor_3_surface
+    
 
     moving = thief.player_movement(current_wall_list, map_offset)
     
@@ -313,13 +317,20 @@ while True:
     
     if thief.rect.colliderect(stair_1_top.rect):
         floor_shown_surface = floor_2_surface
+    elif thief.rect.colliderect(stair_2_down.rect):
+        floor_shown_surface = floor_1_surface
+    elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
+        floor_shown_surface = floor_3_surface
+    elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
+        floor_shown_surface = floor_2_surface
+    
 
     # draw everything
     SCREEN.fill((0, 0, 0))
     SCREEN.blit(floor_shown_surface, floor_rect)
     SCREEN.blit(thief.surface, thief.rect)
 
-    current_wall_list, stair_1_top, stair_2_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+    current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
     draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
     pygame.display.update()

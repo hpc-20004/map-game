@@ -1,3 +1,6 @@
+from turtle import left, right
+
+
 def create_walls(Wall, cx, cy, current_floor):
     # Initialize a dictionary to hold walls for each floor
     wall_list = {
@@ -209,7 +212,7 @@ def create_walls(Wall, cx, cy, current_floor):
     wall_list[1].append(stair_1_top)
     
     # Floor 2
-    # stair walls
+    # stair down walls
     stair_2_down = Wall(800 - cx, 490+725-485 - cy, 170, 10)
     wall_list[2].append(stair_2_down)
     
@@ -311,5 +314,72 @@ def create_walls(Wall, cx, cy, current_floor):
     
     floor_2_right = Wall(1645 - cx, 135 - cy, 10, 1030-135)
     wall_list[2].append(floor_2_right)
+    
+    #stair up walls
+    invisible_railing_2 = Wall(580 - cx, 920 - cy, 590, 10)
+    wall_list[2].append(invisible_railing_2)
+    
+    left_2_up = Wall(830 - cx, 920 - cy, 10,100)
+    wall_list[2].append(left_2_up)
+    
+    right_2_up = Wall(920 - cx, 920 - cy, 10, 100)
+    wall_list[2].append(right_2_up)
+    
+    # Floor 3
+    # stair walls
+    stair_3_left_railing = Wall(580 - cx, 920 - cy, 250, 10)
+    wall_list[3].append(stair_3_left_railing)
+    
+    stair_3_right_railing = Wall(920 - cx, 920 - cy, 250, 10)
+    wall_list[3].append(stair_3_right_railing)
+    
+    left_3_down = Wall(580 - cx, 920 - cy, 10, 100)
+    wall_list[3].append(left_3_down)
+    
+    right_3_down = Wall(1170 - cx, 920 - cy, 10, 100)
+    wall_list[3].append(right_3_down)
+    
+    # art gallery
+    # walls
+    art_top_left = Wall(495 - cx, 425 - cy, 105, 40)
+    wall_list[3].append(art_top_left)
+    
+    art_top_right = Wall(675 - cx, 425 - cy, 815-675, 40)
+    wall_list[3].append(art_top_right)
+    
+    # vault
+    # walls
+    vault_mus = Wall(815 - cx, 135 - cy, 10, 335)
+    wall_list[3].append(vault_mus)
+    
+    # music room
+    # walls 
+    mus_left = Wall(815 - cx, 540 - cy, 10, 40)
+    wall_list[3].append(mus_left)
 
-    return wall_list[current_floor], stair_1_top, stair_2_down
+    mus_bottom = Wall(815 - cx, 580 - cy, 1295-815, 40)
+    wall_list[3].append(mus_bottom)
+    
+    # fire exit
+    # walls
+    fire_left = Wall(1165 - cx, 135 - cy, 10, 260-135)
+    wall_list[3].append(fire_left)
+    
+    fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
+    wall_list[3].append(fire_bottom)
+    
+    
+    # outside walls
+    floor_3_top = Wall(495 - cx, 135 - cy, 1295-495, 40)
+    wall_list[3].append(floor_3_top)
+    
+    floor_3_right = Wall(1295 - cx, 135 - cy, 10, 1030-135)
+    wall_list[3].append(floor_3_right)
+    
+    floor_3_bottom = Wall(495 - cx, 1030 - cy, 1295-495, 10)
+    wall_list[3].append(floor_3_bottom)
+    
+    floor_3_left = Wall(495 - cx, 135 - cy, 10, 1030-135)
+    wall_list[3].append(floor_3_left)
+
+    return wall_list[current_floor], stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down
