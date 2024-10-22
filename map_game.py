@@ -201,7 +201,7 @@ room_list.append(living_right)
 
 
 # FLoor 2
-ensuite = Room("Ensuite",510,640,375,300,2,True,False)
+ensuite = Room("Ensuite",510,640,300,375,2,True,False)
 room_list.append(ensuite)
 
 #player
