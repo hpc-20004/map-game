@@ -1,6 +1,3 @@
-from turtle import left, right
-
-
 def create_walls(Wall, cx, cy, current_floor):
     # Initialize a dictionary to hold walls for each floor
     wall_list = {
