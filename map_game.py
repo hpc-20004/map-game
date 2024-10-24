@@ -14,6 +14,7 @@ import pygame, sys
 from pygame.locals import QUIT
 from walls import create_walls
 from rooms import create_rooms
+from doors import create_doors
 
 #   setup
 pygame.init()
@@ -47,7 +48,7 @@ class Player:
         self.x = x 
         self.y = y
 
-    def player_movement(self, walls, map_offset):
+    def player_movement(self, walls,doors, map_offset):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         
@@ -81,6 +82,23 @@ class Player:
                 if y < 0:  #    moving up, push map back down
                     y = 0
 
+        #   check for collisions with doors
+        for door in doors:
+            door.draw_doors(SCREEN,map_offset[0],map_offset[1])
+            
+            if door.locked: #   prevent player from going through locked doors
+                if self.rect.colliderect(door.rect):
+                    if x > 0:  #    moving right, push map back to the left
+                        x = 0
+                    if x < 0:  #    moving left, push map back to the right
+                        x = 0
+                    if y > 0:  #    moving down, push map back up
+                        y = 0
+                    if y < 0:  #    moving up, push map back down
+                        y = 0
+            else:
+                print("door unlocked")
+                
         #   change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
@@ -145,6 +163,28 @@ class Room:
         else:
             self.in_room = False
             return previous_player_location # if they're still in the same room?
+
+class Door: #   doors 70px tall
+    def __init__(self,x,y,l,w,locked,hidden_exit,orientation):
+        self.x = x
+        self.y = y
+        self.l = l
+        self.w = w
+        self.locked = locked
+        self.hidden_exit = hidden_exit
+        self.orientation = orientation
+        self.rect = pygame.Rect(self.x,self.y,self.w,self.l)
+        
+    # def locked__dialogue(font):
+
+    def door_unlock(self):
+        self.locked = False
+        
+    def draw_doors(self,surface,mox,moy):
+        self.rect = pygame.Rect(self.x + mox,self.y + moy,self.w,self.l)
+        pygame.draw.rect(surface, (255, 255, 255), self.rect)
+        
+    
 
 #   wall class
 class Wall:
@@ -241,6 +281,9 @@ item_list.append(gold_item)
 
 #   rooms
 room_list = create_rooms(Room)
+
+#   doors
+current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
 
 #   floors
 floor_1_surface = pygame.image.load('assets/images/floors/floor 1.png').convert()
@@ -359,7 +402,7 @@ while True:
     #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
     else:
         
-        moving = thief.player_movement(current_wall_list, map_offset)
+        moving = thief.player_movement(current_wall_list, current_door_list, map_offset)
     
         #check if any items are found
         for item in item_list:
@@ -402,9 +445,18 @@ while True:
         
         SCREEN.blit(thief.surface, thief.rect)
     
+        #   walls
         current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
         # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
-        
+        #   doors
+        current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
+
+        for door in current_door_list:
+            door.draw_doors(SCREEN,map_offset[0],map_offset[1])
+
+        if master_key_item.found and current_floor == 2:
+            current_door_list[0].door_unlock()
+
         SCREEN.blit(map_button_surface, map_button_rect)
         SCREEN.blit(checklist_button_surface, checklist_button_rect)
         

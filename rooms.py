@@ -1,6 +1,3 @@
-from sys import breakpointhook
-
-
 def create_rooms(Room):
     #   Room list
     room_list = []
