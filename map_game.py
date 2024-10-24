@@ -9,36 +9,34 @@ Python: 3.11
 ----------------------------------------------------------------
 """
 
-#imports
-import re
+#   imports
 import pygame, sys
 from pygame.locals import QUIT
 from walls import create_walls
+from rooms import create_rooms
 
-#setup
+#   setup
 pygame.init()
 clock = pygame.time.Clock()
 
-#separate animation clock
+#   separate animation clock
 ANIMATION = pygame.USEREVENT
 pygame.time.set_timer(ANIMATION, 200)#  rate
 
-
-#create display surface 900 x 600
+#   create display surface 900 x 600
 SCREEN = pygame.display.set_mode((900,600))
 screen_rect = SCREEN.get_rect()
 
-#screen's center offset
+#   screen's center offset
 CENTER_OFFSET_X = screen_rect.centerx -30
 CENTER_OFFSET_Y = screen_rect.centery +355
 
-#starting map offset
-map_offset = [0, 0]  #x offset, y offset
-map_offset = [0, 0]  #x offset, y offset
+#   starting map offset
+map_offset = [0, 0]  #  x offset, y offset
 
-pygame.display.set_caption("Thief's Gambit")
+pygame.display.set_caption("Thief's Gambit") #  game name
 
-#player class
+#   player class
 class Player:
     def __init__(self, surface, x, y, width, height, speed, moving):
         self.surface = surface
@@ -68,9 +66,9 @@ class Player:
             
         
 
-        #check for collisions and update the map offset
+        #   check for collisions and update the map offset
         for wall in walls:
-            #update wall positions based on the current offset
+            #   update wall positions based on the current offset
             wall.update_position(map_offset[0] + x, map_offset[1] + y)
 
             if self.rect.colliderect(wall.rect):  #detect collisioms
@@ -83,13 +81,13 @@ class Player:
                 if y < 0:  #    moving up, push map back down
                     y = 0
 
-        #change the offset based on how the map has moved
+        #   change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
         
         return self.moving
     
-#game item class
+#   game item class
 class Item:
     def __init__(self, name, image, x, y, l, w, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, found):
         self.name = name
@@ -112,18 +110,18 @@ class Item:
     def find_items(self, map_offset_x, map_offset_y,current_floor):
         keys = pygame.key.get_pressed() # to see if c gets pressed
         
-        if self.floor == current_floor:
-            if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
-                if keys[pygame.K_c]:
-                    print("{} found".format(self.name))
-                    self.found = True
+        if not self.found:
+            if self.floor == current_floor:
+                if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
+                    if keys[pygame.K_c]:
+                        self.found = True
               
     def draw_items(self,mox,moy,current_floor):
         if self.found == False and not self.image == 'none' and self.floor == current_floor:
             self.rect = self.surface.get_rect(center = (self.x+mox,self.y+moy))
             SCREEN.blit(self.surface,self.rect)
                 
-#room class
+#   room class
 class Room:
     def __init__(self, name, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, locked, in_room):
         self.name = name
@@ -136,19 +134,19 @@ class Room:
         self.in_room = in_room
         
     def check_room_location(self, map_offset_x, map_offset_y, previous_player_location, current_floor):
-        if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
-            if self.floor == current_floor:
+        if self.floor == current_floor:
+            if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
                 self.in_room = True
                 return self.name
-            # else:
-            #     self.in_room = False
-            #     return previous_player_location
+            else:
+                self.in_room = False
+                return previous_player_location
                 
         else:
             self.in_room = False
             return previous_player_location # if they're still in the same room?
 
-#wall class
+#   wall class
 class Wall:
     def __init__(self, x, y, width, height):
         self.original_x = x
@@ -158,23 +156,23 @@ class Wall:
         self.rect = pygame.Rect(x, y, width, height)
 
     def update_position(self, map_x, map_y):
-        #update wall's position based on map's position
+        #   update wall's position based on map's position
         self.rect.x = self.original_x + map_x
         self.rect.y = self.original_y + map_y
         
             
     def draw(self, surface, map_x, map_y, current_floor,list):
-        #update position before drawing
+        #   update position before drawing
         self.update_position(map_x, map_y)
         
         pygame.draw.rect(surface, (255, 255, 255), self.rect)
 
-#draw walls
+#   draw walls
 def draw_walls(current_wall_list, surface, map_x, map_y, current_floor):
     for wall in current_wall_list:
         wall.draw(surface, map_x, map_y, current_floor, current_wall_list)
 
-#variables
+#   variables and constants
 speed = 5
 MAP_X = 540
 MAP_Y = -50
@@ -185,28 +183,31 @@ player_location = 0
 current_floor = 1 # player starts at ground level
 ui_bg_showing = False
 ui_shown = 0 #  should be either map or checklist
+no_of_items = 8
+CHECKLIST_RED = (153,0,0)
+FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
 
-#player
+#   player
 THIEF_SPRITES = []
 for sprite in range(12):  #tile000.png to tile011.png
     
-    #image name
+    #   image name
     sprite_file = f'assets/images/thief/tile{sprite:03}.png'  #:03 so it has 3 digits
         
-    #load
+    #   load
     original_sprite = pygame.image.load(sprite_file).convert()
         
-    #get sprite dimensions
+    #   get sprite dimensions
     original_width, original_height = original_sprite.get_size()
         
-    #change ONLY height to 55px
+    #   change ONLY height to 55px
     new_height = 50
     new_width = (50/original_height) * original_width
     new_size = (new_width, new_height)
         
     resized_sprite = pygame.transform.scale(original_sprite, new_size)
         
-    #append to sprite list
+    #   append to sprite list
     THIEF_SPRITES.append(resized_sprite)
 
 thief = Player(THIEF_SPRITES[8],450, 300, 50, 50, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
@@ -214,63 +215,34 @@ thief = Player(THIEF_SPRITES[8],450, 300, 50, 50, 5,moving) #x and y values are 
 
 current_sprite = THIEF_SPRITES[8]
 
-#item list
+#   item list
 item_list = []
-
-book_item = Item("The Great Gutsby", 'none', 0,0,0,0, 525,580,195,205,1,False)
-item_list.append(book_item)
 
 master_key_item = Item("Master Bedroom Key", "assets/images/items/key.png", 585 - CENTER_OFFSET_X, 390 - CENTER_OFFSET_Y, 40, 40, 265,285,545,600,1,False)
 item_list.append(master_key_item)
 
+book_item = Item("The Great Gutsby", 'none', 0,0,0,0, 525,580,195,205,1,False)
+item_list.append(book_item)
+
 tv_item = Item("TV", "assets/images/items/tv.png", 1505 - CENTER_OFFSET_X, 330 - CENTER_OFFSET_Y, 141, 141, -690, -580, 590, 595, 1, False)
 item_list.append(tv_item)
-
-fire_exit_key_item = Item("Fire Exit Key","assets/images/items/key.png", 290 - CENTER_OFFSET_X, 650 - CENTER_OFFSET_Y, 40,40,525,635,260,330,2,False)
-item_list.append(fire_exit_key_item)
-
-gold_item = Item("Bars of Gold","assets/images/items/gold.png", 655 - CENTER_OFFSET_X, 305 - CENTER_OFFSET_Y,50,50,185,255,635,695,3,False)
-item_list.append(gold_item)
-
-painting_item = Item("'A Cloudy Night' Painting", "assets/images/items/painting.png",1095 - CENTER_OFFSET_X, 630 - CENTER_OFFSET_Y,80,50,-260,-205,295,310,3,False)
-item_list.append(painting_item)
 
 violin_item = Item("Paganini's Violin","assets/images/items/violin.png",1125 - CENTER_OFFSET_X, 305 - CENTER_OFFSET_Y,30,30,-275,-215,640,685,3,False)
 item_list.append(violin_item)
 
-#room list
-room_list = []
+fire_exit_key_item = Item("Fire Exit Key","assets/images/items/key.png", 290 - CENTER_OFFSET_X, 650 - CENTER_OFFSET_Y, 40,40,525,635,260,330,2,False)
+item_list.append(fire_exit_key_item)
 
-# floor 1
-foyer = Room("Foyer",-240,285,-180,410,1,False,False)
-room_list.append(foyer)
+painting_item = Item("'A Cloudy Night' Painting", "assets/images/items/painting.png",1095 - CENTER_OFFSET_X, 630 - CENTER_OFFSET_Y,80,50,-260,-205,295,310,3,False)
+item_list.append(painting_item)
 
-library = Room("Library",240,635,-50,205,1,False,False)
-room_list.append(library)
+gold_item = Item("Bars of Gold","assets/images/items/gold.png", 655 - CENTER_OFFSET_X, 305 - CENTER_OFFSET_Y,50,50,185,255,635,695,3,False)
+item_list.append(gold_item)
 
-dining = Room("Dining Room",335,635,305,655,1,False,False)
-room_list.append(dining)
+#   rooms
+room_list = create_rooms(Room)
 
-cleaning = Room("Cleaning Supplies Closet",110,285,495,610,1,False,False)
-room_list.append(cleaning)
-
-#   L shaped rooms are  
-kitchen_left = Room("Kitchen",-265,60,495,720,1,False,False)
-kitchen_right = Room("Kitchen",-465,-266,270,595,1,False,False)
-room_list.append(kitchen_left)
-room_list.append(kitchen_right)
-
-living_left = Room("Living Room",-514,-290,-50,185,1,False,False)
-living_right = Room("Living Room",-755,-515,-50,595,1,False,False)
-room_list.append(living_left)
-room_list.append(living_right)
-
-
-# FLoor 2
-ensuite = Room("Ensuite",510,640,300,375,2,True,False)
-room_list.append(ensuite)
-
-#floors
+#   floors
 floor_1_surface = pygame.image.load('assets/images/floors/floor 1.png').convert()
 floor_2_surface = pygame.image.load('assets/images/floors/floor 2.png').convert()
 floor_3_surface = pygame.image.load('assets/images/floors/floor 3.png').convert()
@@ -278,7 +250,7 @@ floor_3_surface = pygame.image.load('assets/images/floors/floor 3.png').convert(
 floor_shown_surface = floor_1_surface #  starts at floor 1 
 floor_rect = floor_shown_surface.get_rect(center = (540,-50)) # initially puts center at the entrance
 
-#walls (relative to the center of the screen)
+#   walls (relative to the center of the screen)
 current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
 
 # UI
@@ -300,8 +272,17 @@ ui_x_rect = ui_x_surface.get_rect(center=(780, 90))
 # checklist
 checklist_surface = pygame.image.load("assets/images/UI/checklist.png").convert_alpha()
 checklist_rect = checklist_surface.get_rect(center=(450,300))
+checklist_thickness = 5 # might change this later
 
-
+checklist_list = [
+    pygame.Rect(76,180,350,checklist_thickness),
+    pygame.Rect(80,240,560,checklist_thickness),
+    pygame.Rect(77,290,50,checklist_thickness),
+    pygame.Rect(79,350,270,checklist_thickness),
+    pygame.Rect(75,410,229,checklist_thickness),
+    pygame.Rect(77,470,260,checklist_thickness),
+    pygame.Rect(76,530,230,checklist_thickness)
+    ]
 
 # game loop
 while True:
@@ -320,7 +301,7 @@ while True:
             print(player_location)
             print("current floor {}".format(current_floor))
             
-            #clicking buttons
+            #   clicking buttons
             mouse_pos = pygame.mouse.get_pos() 
             
             if ui_bg_showing == False:
@@ -338,7 +319,6 @@ while True:
                     print("checklist clicked")
                     ui_shown = 'checklist'
             else:
-                
                 if ui_x_rect.collidepoint(mouse_pos):
                     ui_bg_showing = False
 
@@ -360,65 +340,74 @@ while True:
             if keys[pygame.K_3]:
                 floor_shown_surface = floor_3_surface
     
-
-    moving = thief.player_movement(current_wall_list, map_offset)
     
-    #check if any items are found
-    for item in item_list:
-        item.find_items(map_offset[0],map_offset[1],current_floor)
-        
-    #check what room the player's in
-    for room in room_list:
-        player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
-        
-    #check what floor the player's in
-    if floor_shown_surface == floor_1_surface:
-        current_floor = 1
-    elif floor_shown_surface == floor_2_surface:
-        current_floor = 2
-    elif floor_shown_surface == floor_3_surface:
-        current_floor = 3
-
-    # update the current sprite based on the animation frame
-    current_sprite = THIEF_SPRITES[thief_frame]
-    thief.surface = current_sprite
-
-    # update floor position and floor
-    floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
-    
-    if thief.rect.colliderect(stair_1_top.rect):
-        floor_shown_surface = floor_2_surface
-    elif thief.rect.colliderect(stair_2_down.rect):
-        floor_shown_surface = floor_1_surface
-    elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
-        floor_shown_surface = floor_3_surface
-    elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
-        floor_shown_surface = floor_2_surface
-    
-
-    # draw everything
-    SCREEN.fill((0, 0, 0))
-    SCREEN.blit(floor_shown_surface, floor_rect)
-    
-    for i in item_list:
-        i.draw_items(map_offset[0], map_offset[1],current_floor)
-        
-    SCREEN.blit(thief.surface, thief.rect)
-    
-    current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
-    # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
-    
+    #   show only the ui when the ui is opened
     if ui_bg_showing:
+        
         SCREEN.blit(ui_bg_surface, ui_bg_rect)
         SCREEN.blit(ui_x_surface, ui_x_rect)
         if ui_shown == 'checklist':
             SCREEN.blit(checklist_surface, checklist_rect)
+            for i in range(no_of_items-1): #    iterate through the items to check if they're found
+                if item_list[i].found:
+                    pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
+        if ui_shown == 'map':
+            player_location_surface = FONT.render(player_location,True,(0,0,0)) 
+            player_location_rect = player_location_surface.get_rect(center = (450,500))
+            SCREEN.blit(player_location_surface, player_location_rect)
+            
+    #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
     else:
+        
+        moving = thief.player_movement(current_wall_list, map_offset)
+    
+        #check if any items are found
+        for item in item_list:
+            item.find_items(map_offset[0],map_offset[1],current_floor)
+        
+        #check what room the player's in
+        for room in room_list:
+            player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
+        
+        #check what floor the player's in
+        if floor_shown_surface == floor_1_surface:
+            current_floor = 1
+        elif floor_shown_surface == floor_2_surface:
+            current_floor = 2
+        elif floor_shown_surface == floor_3_surface:
+            current_floor = 3
+
+        # update the current sprite based on the animation frame
+        current_sprite = THIEF_SPRITES[thief_frame]
+        thief.surface = current_sprite
+
+        # update floor position and floor
+        floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
+    
+        if thief.rect.colliderect(stair_1_top.rect):
+            floor_shown_surface = floor_2_surface
+        elif thief.rect.colliderect(stair_2_down.rect):
+            floor_shown_surface = floor_1_surface
+        elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
+            floor_shown_surface = floor_3_surface
+        elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
+            floor_shown_surface = floor_2_surface
+            
+        # draw everything
+        SCREEN.fill((0, 0, 0))
+        SCREEN.blit(floor_shown_surface, floor_rect)
+    
+        for i in item_list:
+            i.draw_items(map_offset[0], map_offset[1],current_floor)
+        
+        SCREEN.blit(thief.surface, thief.rect)
+    
+        current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+        # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
+        
         SCREEN.blit(map_button_surface, map_button_rect)
         SCREEN.blit(checklist_button_surface, checklist_button_rect)
         
-
-    # print(painting_item.x,painting_item.y)
     pygame.display.update()
     clock.tick(60)  # frame rate
     

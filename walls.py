@@ -11,7 +11,7 @@ def create_walls(Wall, cx, cy, current_floor):
     lib_top = Wall(205 - cx, 675 - cy, 655-205, 10)
     wall_list[1].append(lib_top)
     
-    lib_right_top = Wall(650 - cx, 675 - cy, 10, 850-675)
+    lib_right_top = Wall(650 - cx, 675 - cy, 10, 850-695)
     wall_list[1].append(lib_right_top)
     
     lib_right_bottom = Wall(650 - cx, 920 - cy, 10, 1030-920)
