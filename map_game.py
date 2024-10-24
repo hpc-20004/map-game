@@ -217,20 +217,26 @@ current_sprite = THIEF_SPRITES[8]
 #item list
 item_list = []
 
-# book_item = Item("The Great Gutsby", 'none', 525,580,195,205,1,False)
-# item_list.append(book_item)
+book_item = Item("The Great Gutsby", 'none', 0,0,0,0, 525,580,195,205,1,False)
+item_list.append(book_item)
 
-# master_key_item = Item("Master Bedroom Key", "assets/images/items/key.png", 265,285,545,600,1,False)
-# item_list.append(master_key_item)
+master_key_item = Item("Master Bedroom Key", "assets/images/items/key.png", 585 - CENTER_OFFSET_X, 390 - CENTER_OFFSET_Y, 40, 40, 265,285,545,600,1,False)
+item_list.append(master_key_item)
 
 tv_item = Item("TV", "assets/images/items/tv.png", 1505 - CENTER_OFFSET_X, 330 - CENTER_OFFSET_Y, 141, 141, -690, -580, 590, 595, 1, False)
 item_list.append(tv_item)
 
-# fire_exit_key_item = Item("Fire Exit Key","assets/images/items/key.png",525,635,260,330,2,False)
-# item_list.append(fire_exit_key_item)
+fire_exit_key_item = Item("Fire Exit Key","assets/images/items/key.png", 290 - CENTER_OFFSET_X, 650 - CENTER_OFFSET_Y, 40,40,525,635,260,330,2,False)
+item_list.append(fire_exit_key_item)
 
 gold_item = Item("Bars of Gold","assets/images/items/gold.png", 655 - CENTER_OFFSET_X, 305 - CENTER_OFFSET_Y,50,50,185,255,635,695,3,False)
 item_list.append(gold_item)
+
+painting_item = Item("'A Cloudy Night' Painting", "assets/images/items/painting.png",1095 - CENTER_OFFSET_X, 630 - CENTER_OFFSET_Y,80,50,-260,-205,295,310,3,False)
+item_list.append(painting_item)
+
+violin_item = Item("Paganini's Violin","assets/images/items/violin.png",1125 - CENTER_OFFSET_X, 305 - CENTER_OFFSET_Y,30,30,-275,-215,640,685,3,False)
+item_list.append(violin_item)
 
 #room list
 room_list = []
@@ -411,6 +417,8 @@ while True:
         SCREEN.blit(map_button_surface, map_button_rect)
         SCREEN.blit(checklist_button_surface, checklist_button_rect)
         
+
+    # print(painting_item.x,painting_item.y)
     pygame.display.update()
     clock.tick(60)  # frame rate
     
