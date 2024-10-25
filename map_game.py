@@ -89,15 +89,15 @@ class Player:
             if door.locked: #   prevent player from going through locked doors
                 if self.rect.colliderect(door.rect):
                     if x > 0:  #    moving right, push map back to the left
-                        x = 0
+                        x = -1
                     if x < 0:  #    moving left, push map back to the right
-                        x = 0
+                        x = 1
                     if y > 0:  #    moving down, push map back up
-                        y = 0
+                        y = -1
                     if y < 0:  #    moving up, push map back down
-                        y = 0
-            else:
-                print("door unlocked")
+                        y = 1
+            # else:
+            #     print("door unlocked")
                 
         #   change the offset based on how the map has moved
         map_offset[0] += x
@@ -136,12 +136,12 @@ class Item:
               
     def draw_items(self,mox,moy,current_floor):
         if self.found == False and not self.image == 'none' and self.floor == current_floor:
-            self.rect = self.surface.get_rect(center = (self.x+mox,self.y+moy))
+            self.rect = self.surface.get_rect(center = (self.x+mox, self.y+moy))
             SCREEN.blit(self.surface,self.rect)
                 
 #   room class
 class Room:
-    def __init__(self, name, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, locked, in_room):
+    def __init__(self, name, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, locked, in_room, map_coords):
         self.name = name
         self.min_x_offset = min_x_offset
         self.max_x_offset = max_x_offset
@@ -150,6 +150,7 @@ class Room:
         self.floor = floor # once floors are implemented in the find items method check if player's floor and room floor are the same
         self.locked = locked
         self.in_room = in_room
+        self.map_coords = map_coords
         
     def check_room_location(self, map_offset_x, map_offset_y, previous_player_location, current_floor):
         if self.floor == current_floor:
@@ -223,7 +224,7 @@ player_location = 0
 current_floor = 1 # player starts at ground level
 ui_bg_showing = False
 ui_shown = 0 #  should be either map or checklist
-no_of_items = 8
+no_of_items = 7
 CHECKLIST_RED = (153,0,0)
 FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
 
@@ -308,13 +309,31 @@ ui_bg_surface = pygame.image.load("assets/images/UI/UI BG.png").convert_alpha()
 ui_bg_rect = ui_bg_surface.get_rect(center = (450,300))
 
 ui_x_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/temp x.png").convert_alpha(),(100,100)) # temporary until i get an x
-ui_x_rect = ui_x_surface.get_rect(center=(780, 90))
+ui_x_rect = ui_x_surface.get_rect(center = (780, 90))
 
 # map
+map_list = []
+
+map_floor_1_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/map floor 1.png").convert_alpha(),(600,400))
+
+map_floor_2_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/map floor 2.png").convert_alpha(),(600,400))
+
+map_floor_3_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/map floor 3.png").convert_alpha(),(600,400))
+
+#  add them to the map list
+map_list.append(map_floor_1_surface)
+
+map_list.append(map_floor_2_surface)
+
+map_list.append(map_floor_3_surface)
+
+map_thief_icon_surface = pygame.image.load("assets/images/thief/tile007.png").convert_alpha()
+
+map_thief_coordinates = []
 
 # checklist
 checklist_surface = pygame.image.load("assets/images/UI/checklist.png").convert_alpha()
-checklist_rect = checklist_surface.get_rect(center=(450,300))
+checklist_rect = checklist_surface.get_rect(center = (450,300))
 checklist_thickness = 5 # might change this later
 
 checklist_list = [
@@ -348,7 +367,7 @@ while True:
             mouse_pos = pygame.mouse.get_pos() 
             
             if ui_bg_showing == False:
-            
+                
                 if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
                     ui_bg_showing = True
                 else:
@@ -361,11 +380,14 @@ while True:
                 if checklist_button_rect.collidepoint(mouse_pos):
                     print("checklist clicked")
                     ui_shown = 'checklist'
+                    
             else:
+                
                 if ui_x_rect.collidepoint(mouse_pos):
                     ui_bg_showing = False
 
         if event.type == ANIMATION: #   animation
+            
             if keys[pygame.K_w]:
                 thief_frame = (thief_frame - 1) % 3 
             if keys[pygame.K_s]:
@@ -374,7 +396,9 @@ while True:
                 thief_frame = (thief_frame + 1) % 3 + 9  
             if keys[pygame.K_d]:
                 thief_frame = (thief_frame + 1) % 3 + 3  
+                
         if event.type == pygame.KEYDOWN: #testing floors
+            
             keys = pygame.key.get_pressed()
             if keys[pygame.K_1]:
                 floor_shown_surface = floor_1_surface
@@ -388,16 +412,31 @@ while True:
     if ui_bg_showing:
         
         SCREEN.blit(ui_bg_surface, ui_bg_rect)
+        
         SCREEN.blit(ui_x_surface, ui_x_rect)
+        
         if ui_shown == 'checklist':
+            
             SCREEN.blit(checklist_surface, checklist_rect)
-            for i in range(no_of_items-1): #    iterate through the items to check if they're found
+            for i in range(no_of_items): #    iterate through the items to check if they're found
                 if item_list[i].found:
                     pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
+                    
         if ui_shown == 'map':
+            
             player_location_surface = FONT.render(player_location,True,(0,0,0)) 
             player_location_rect = player_location_surface.get_rect(center = (450,500))
+            
+            # map_thief_con_rect = map_thief_icon_surface.get_rect(center = ())
+            for room in room_list:
+                if player_location == room.name:
+                    map_thief_con_rect = map_thief_icon_surface.get_rect(center = room.map_coords)
+
+            # use the current floor to determine which floor is shown on the map ui
+            SCREEN.blit(map_list[current_floor - 1],map_list[current_floor - 1].get_rect(center = (450,250)))
+
             SCREEN.blit(player_location_surface, player_location_rect)
+            SCREEN.blit(map_thief_icon_surface,map_thief_con_rect)
             
     #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
     else:

@@ -3,63 +3,63 @@ def create_rooms(Room):
     room_list = []
 
     # Floor 1
-    foyer = Room("Foyer",-240,285,-180,410,1,False,False)
+    foyer = Room("Foyer",-240,285,-180,410,1,False,False,(435,325))
     room_list.append(foyer)
 
-    library = Room("Library",240,635,-50,205,1,False,False)
+    library = Room("Library",240,635,-50,205,1,False,False,(285,325))
     room_list.append(library)
 
-    dining = Room("Dining Room",335,635,305,655,1,False,False)
+    dining = Room("Dining Room",335,635,305,655,1,False,False,(270,200))
     room_list.append(dining)
 
-    cleaning = Room("Cleaning Supplies Closet",110,285,495,610,1,False,False)
+    cleaning = Room("Cleaning Supplies Closet",110,285,495,610,1,False,False,(355,180))
     room_list.append(cleaning)
 
     #   L shaped rooms are  
-    kitchen_left = Room("Kitchen",-265,60,495,720,1,False,False)
-    kitchen_right = Room("Kitchen",-465,-266,270,595,1,False,False)
+    kitchen_left = Room("Kitchen",-265,60,495,720,1,False,False,(445,165))
+    kitchen_right = Room("Kitchen",-465,-266,270,595,1,False,False,(445,165))
     room_list.append(kitchen_left)
     room_list.append(kitchen_right)
 
-    living_left = Room("Living Room",-514,-290,-50,185,1,False,False)
-    living_right = Room("Living Room",-755,-515,-50,595,1,False,False)
+    living_left = Room("Living Room",-514,-290,-50,185,1,False,False,(615,330))
+    living_right = Room("Living Room",-755,-515,-50,595,1,False,False,(615,330))
     room_list.append(living_left)
     room_list.append(living_right)
 
 
     # FLoor 2
-    master = Room("Master Bedroom",400,635,-50,335,2,True,False)
+    master = Room("Master Bedroom",400,635,-50,335,2,True,False,(260,335))
     room_list.append(master)
     
-    ensuite = Room("Ensuite",510,640,300,375,2,False,False)
+    ensuite = Room("Ensuite",510,640,300,375,2,False,False,(245,260))
     room_list.append(ensuite)
     
-    hallway = Room("Hallway",-405,350,-50,755,2,False,False)
+    hallway = Room("Hallway",-405,350,-50,755,2,False,False,(435,275))
     room_list.append(hallway)
     
-    powder_room = Room("Powder Room",115,255,720,755,2,False,False)
+    powder_room = Room("Powder Room",115,255,720,755,2,False,False,(365,120))
     room_list.append(powder_room)
     
-    bathroom = Room("Bathroom",-405,-165,620,755,2,False,False)
+    bathroom = Room("Bathroom",-405,-165,620,755,2,False,False,(510,140))
     room_list.append(bathroom)
     
-    room_2 = Room("Bedroom 2",305,635,425,755,2,False,False)
+    room_2 = Room("Bedroom 2",305,635,425,755,2,False,False,(275,170))
     room_list.append(room_2)
     
-    room_3 = Room("Bedroom 3",-755,-455,400,755,2,False,False)
+    room_3 = Room("Bedroom 3",-755,-455,400,755,2,False,False,(610,175))
     room_list.append(room_3)
     
-    room_4 = Room("Bedroom 4",-755,-455,-50,310,2,False,False)
+    room_4 = Room("Bedroom 4",-755,-455,-50,310,2,False,False,(610,315))
     room_list.append(room_4)
     
     #   Floor 3
-    art = Room("Art Gallery",-405,345,-50,465,3,False,False)
+    art = Room("Art Gallery",-405,345,-50,465,3,False,False,(420,310))
     room_list.append(art)
     
-    vault = Room("Vault",75,345,555,755,3,False,False)
+    vault = Room("Vault",75,345,555,755,3,False,False,(355,150))
     room_list.append(vault)
     
-    music = Room("Music Room",-405,25,400,755,3,False,False)
+    music = Room("Music Room",-405,25,400,755,3,False,False,(475,185))
     room_list.append(music)
     
     return room_list
