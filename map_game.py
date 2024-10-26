@@ -56,13 +56,13 @@ class Player:
         if keys[pygame.K_w]:
             y = self.speed  #   move map down
             self.moving = True
-        if keys[pygame.K_s]:
+        elif keys[pygame.K_s]:
             y = -self.speed  #  move map up
             self.moving = True
         if keys[pygame.K_a]:
             x = self.speed  #   move map right
             self.moving = True
-        if keys[pygame.K_d]:
+        elif keys[pygame.K_d]:
             x = -self.speed  #  move map left
             self.moving = True
             
@@ -89,14 +89,14 @@ class Player:
         
             if door.locked == True and self.rect.colliderect(door.rect):
                 # prevent player from walking into door
-                if x > 0: 
-                    x = -1
-                if x < 0: 
-                    x = -1
-                if y > 0: 
-                    y = -1
-                if y < 0: 
-                    y = -1
+                if x > 0:  #    moving right, push map back to the left
+                    x = 0
+                if x < 0:  #    moving left, push map back to the right
+                    x = 0
+                if y > 0:  #    moving down, push map back up
+                    y = 0
+                if y < 0:  #    moving up, push map back down
+                    y = 0
 
                 # create door locked dialogue
                 door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
