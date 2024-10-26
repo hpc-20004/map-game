@@ -235,7 +235,7 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
     
 
 #   variables and constants
-speed = 5
+speed = 3
 MAP_X = 540
 MAP_Y = -50
 collide = False
