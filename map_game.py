@@ -87,7 +87,7 @@ class Player:
         for door in doors:
             door.draw_doors(SCREEN, map_offset[0], map_offset[1])
         
-            if door.locked and self.rect.colliderect(door.rect):
+            if door.locked == True and self.rect.colliderect(door.rect):
                 # prevent player from walking into door
                 if x > 0: 
                     x = -1
@@ -136,13 +136,14 @@ class Item:
                     if keys[pygame.K_c]:
                         self.found = True
                         
-                        item_dialogue_surface = FONT.render(f'{self.name} is locked', True, (255,255,255)) 
-                        item_dialogue_rect = item_dialogue_surface.get_rect(center = (450,500))
+                        # item_dialogue_surface = FONT.render(f'{self.name} is locked', True, (255,255,255)) 
+                        # item_dialogue_rect = item_dialogue_surface.get_rect(center = (450,500))
                         
                         print("a")
+                        cha_ching.play()
                         
                         # item_dialogue_showing = True
-                        SCREEN.blit(item_dialogue_surface,item_dialogue_rect)
+                        # SCREEN.blit(item_dialogue_surface,item_dialogue_rect)
               
     def draw_items(self,mox,moy,current_floor):
         if self.found == False and not self.image == 'none' and self.floor == current_floor:
@@ -249,6 +250,7 @@ CHECKLIST_RED = (153,0,0)
 FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
 door_dialogue_showing = False
 item_dialogue_showing = False
+cha_ching = pygame.mixer.Sound('assets/audio/cha-ching-sound.mp3')
 
 #   player
 THIEF_SPRITES = []
@@ -504,8 +506,7 @@ while True:
         for i in item_list:
             i.draw_items(map_offset[0], map_offset[1],current_floor)
             
-        if master_key_item.found and current_floor == 2:
-            current_door_list[0].door_unlock()
+        
             
         SCREEN.blit(thief.surface, thief.rect)
     
@@ -517,7 +518,8 @@ while True:
 
         for door in current_door_list:
             door.draw_doors(SCREEN,map_offset[0],map_offset[1])
-
+        if master_key_item.found and current_floor == 2:
+                    current_door_list[0].door_unlock()
         if door_dialogue_surface and door_dialogue_rect:
             draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
         else:
