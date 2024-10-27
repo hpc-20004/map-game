@@ -48,7 +48,7 @@ class Player:
         self.x = x 
         self.y = y
 
-    def player_movement(self, walls,doors, map_offset, FONT):
+    def player_movement(self, walls, doors, map_offset, FONT, items_collected, no_of_items):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         door_dialogue_surface, door_dialogue_rect = None, None
@@ -66,7 +66,6 @@ class Player:
             x = -self.speed  #  move map left
             self.moving = True
             
-        
 
         #   check for collisions and update the map offset
         for wall in walls:
@@ -86,13 +85,16 @@ class Player:
         #   check for collisions with doors
         for door in doors:
             door.draw_doors(SCREEN, map_offset[0], map_offset[1])
+            
             x_distance_from_door = self.x - door.rect.x
             y_distance_from_door = self.y - door.rect.y
+            x_door_hit = door.w * 2
+            y_door_hit = door.l + 20
         
             if door.locked:
 
                 if x_distance_from_door > 0: # doors on the left of player
-                    if x_distance_from_door < 30:
+                    if x_distance_from_door < x_door_hit:
                         if door.orientation == 'horizontal':
                             x = -1  # sort of 'knockback' the player so they don't get stuck and it's also visual feedback that they can't go in
                             
@@ -100,40 +102,61 @@ class Player:
                             door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
                     
                 if x_distance_from_door < 0: # doors on the right of player
-                    if x_distance_from_door > -30:
+                    if x_distance_from_door > - x_door_hit:
                         if door.orientation == 'horizontal':
                             x = 1
                             # create door locked dialogue
                             door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
                             
                 if y_distance_from_door > 0: # door above player
-                    if y_distance_from_door < 80:
+                    if y_distance_from_door < y_door_hit:
                         if door.orientation == 'vertical':
                             if 0 < x_distance_from_door < door.w: #   only stops the player from going up when they're aligned with the door
                                 y = -1
                                 # create door locked dialogue
-                                door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                                door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
                     
                 if y_distance_from_door < 0: # door below player
-                    if y_distance_from_door > -80:
+                    if y_distance_from_door > - y_door_hit:
                         if door.orientation == 'vertical':
                             if 0 < x_distance_from_door < door.w:
-                                y = -1
+                                y = 1
                                 # create door locked dialogue
-                                door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                                door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
+                                
+            if door.hidden_exit and not door.locked:
+                
+                if self.rect.colliderect(door.rect):
+                    
+                    if items_collected < no_of_items: #   fire exit unlocked before collecting all items
+                        
+                        hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "There's still more to steal!")
+
+                        print("there's still some items to collect")
+                        
+                    else:
+                        hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "game won")
+                        print("game won")
+                        
+                else:
+                    hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None)
+            else:
+                    hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None)
 
         #   change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
 
-        return self.moving, door_dialogue_surface, door_dialogue_rect
+        return self.moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden__exit_dialogue_rect
     
 #   game item class
 class Item:
     def __init__(self, name, image, x, y, l, w, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, found):
+        
         self.name = name
         self.image = image
         if not image == 'none': #   only make these for items that have an image
+            
             self.surface = pygame.transform.scale(pygame.image.load(image).convert_alpha(),(l,w))
         
         self.x = x
@@ -148,27 +171,51 @@ class Item:
         self.floor = floor # once floors are implemented in the find items method check if player's floor and item floor are the same
         self.found = found
         
-    def find_items(self, map_offset_x, map_offset_y,current_floor,item_dialogue_showing,SCREEN):
+    def find_items(self, map_offset_x, map_offset_y,current_floor,items_collected):
         keys = pygame.key.get_pressed() # to see if c gets pressed
         
         if not self.found:
+            
             if self.floor == current_floor:
+                
                 if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
                     if keys[pygame.K_c]:
+                        
                         self.found = True
+                       
+                        items_collected += 1
                         
-                        # item_dialogue_surface = FONT.render(f'{self.name} is locked', True, (255,255,255)) 
-                        # item_dialogue_rect = item_dialogue_surface.get_rect(center = (450,500))
-                        
-                        print("a")
                         cha_ching.play()
                         
-                        # item_dialogue_showing = True
-                        # SCREEN.blit(item_dialogue_surface,item_dialogue_rect)
-              
+                        return items_collected
+                    
+                    else:
+            
+                        items_collected = items_collected # number of items collected stays the same so the same value is returned
+            
+                        return items_collected
+                else:
+            
+                        items_collected = items_collected # number of items collected stays the same so the same value is returned
+            
+                        return items_collected
+            else:
+            
+                        items_collected = items_collected # number of items collected stays the same so the same value is returned
+            
+                        return items_collected
+        else:
+            
+                        items_collected = items_collected # number of items collected stays the same so the same value is returned
+            
+                        return items_collected
+        
     def draw_items(self,mox,moy,current_floor):
+
         if self.found == False and not self.image == 'none' and self.floor == current_floor:
+            
             self.rect = self.surface.get_rect(center = (self.x+mox, self.y+moy))
+            
             SCREEN.blit(self.surface,self.rect)
                 
 #   room class
@@ -198,7 +245,7 @@ class Room:
             return previous_player_location # if they're still in the same room?
 
 class Door: #   doors 70px tall
-    def __init__(self,room,x,y,l,w,locked,hidden_exit,orientation):
+    def __init__(self,room,x,y,l,w,locked, hidden_exit,orientation):
         self.room = room
         self.x = x
         self.y = y
@@ -209,14 +256,26 @@ class Door: #   doors 70px tall
         self.orientation = orientation
         self.rect = pygame.Rect(self.x,self.y,self.w,self.l)
         
-    def locked__dialogue(self,FONT):
+    def locked_dialogue(self,FONT):
         door_locked_dialogue_surface = FONT.render(f'{self.room} is locked.', True, (255,255,255)) 
         door_locked_dialogue_rect = door_locked_dialogue_surface.get_rect(center = (450,500))
         
         return door_locked_dialogue_surface, door_locked_dialogue_rect
+    
+    def hidden_exit_dialogue(self,FONT, message):
+        hidden_exit_dialogue_surface = FONT.render(message , True, (255,255,255))
+        hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (450,500))
+        
+        return hidden_exit_dialogue_surface, hidden_exit_dialogue_rect
 
     def door_unlock(self):
         self.locked = False
+        
+    def unlock_hidden_exit(self, items_collected, no_of_items):
+        #   unlock hidden exits once all items are collected
+        if self.hidden_exit and items_collected == no_of_items: # if all items are collected  
+            self.locked = False
+            print("aaa")
         
     def draw_doors(self,surface,mox,moy):
         self.rect = pygame.Rect(self.x + mox,self.y + moy,self.w,self.l)
@@ -256,6 +315,14 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
     
 
 #   variables and constants
+#   game states
+game_active = False
+game_over = False
+game_endings = ["Win: Jumped out the window!",
+                "Win: Front door - why not?",
+                "Win: Fire exit.. Where's the fire?",
+                "Game over: The owners are back!"]
+
 speed = 3
 MAP_X = 540
 MAP_Y = -50
@@ -272,6 +339,7 @@ FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
 door_dialogue_showing = False
 item_dialogue_showing = False
 cha_ching = pygame.mixer.Sound('assets/audio/cha-ching-sound.mp3')
+items_collected = 0
 
 #   player
 THIEF_SPRITES = []
@@ -344,11 +412,13 @@ current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down
 
 # UI
 # icons
-map_button_surface = pygame.image.load("assets/images/UI/map icon.png").convert_alpha()
-map_button_rect = map_button_surface.get_rect(center = (780, 90))
+UI_icon_size = 100
 
-checklist_button_surface = pygame.image.load("assets/images/UI/checklist icon.png").convert_alpha()
-checklist_button_rect = checklist_button_surface.get_rect(center = (780,220))
+map_button_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/map icon.png").convert_alpha(),(UI_icon_size,UI_icon_size))
+map_button_rect = map_button_surface.get_rect(center = (800, 70))
+
+checklist_button_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/checklist icon.png").convert_alpha(),(UI_icon_size,UI_icon_size))
+checklist_button_rect = checklist_button_surface.get_rect(center = (800,180))
 
 ui_bg_surface = pygame.image.load("assets/images/UI/UI BG.png").convert_alpha()
 ui_bg_rect = ui_bg_surface.get_rect(center = (450,300))
@@ -391,6 +461,16 @@ checklist_list = [
     pygame.Rect(76,530,230,checklist_thickness)
     ]
 
+#   start screen
+start_screen_surface = pygame.image.load("assets/images/UI/start screen.png").convert_alpha()
+start_screen_rect = start_screen_surface.get_rect(center = (450,300))
+
+start_bg_screen_surface = pygame.image.load("assets/images/UI/start bg.png").convert()
+start_bg_screen_rect = start_bg_screen_surface.get_rect(center =(450,300))
+
+start_button_rect = pygame.Rect(250,485,100,40)
+start_quit_button_rect = pygame.Rect(550,485,100,40)
+
 # game loop
 while True:
     keys = pygame.key.get_pressed()
@@ -407,29 +487,38 @@ while True:
             print(map_offset[1])
             print(player_location)
             print("current floor {}".format(current_floor))
-            
+            print(items_collected)
+
             #   clicking buttons
             mouse_pos = pygame.mouse.get_pos() 
             
-            if ui_bg_showing == False:
+            if game_active:
+                if ui_bg_showing == False:
                 
-                if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
-                    ui_bg_showing = True
-                else:
-                    ui_bg_showing = False
+                    if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
+                        ui_bg_showing = True
+                    else:
+                        ui_bg_showing = False
                 
-                if map_button_rect.collidepoint(mouse_pos):
-                    print("map clicked")
-                    ui_shown = 'map'
+                    if map_button_rect.collidepoint(mouse_pos):
+                        print("map clicked")
+                        ui_shown = 'map'
                 
-                if checklist_button_rect.collidepoint(mouse_pos):
-                    print("checklist clicked")
-                    ui_shown = 'checklist'
+                    if checklist_button_rect.collidepoint(mouse_pos):
+                        print("checklist clicked")
+                        ui_shown = 'checklist'
                     
-            else:
+                else:
                 
-                if ui_x_rect.collidepoint(mouse_pos):
-                    ui_bg_showing = False
+                    if ui_x_rect.collidepoint(mouse_pos):
+                        ui_bg_showing = False
+                        
+            else:            
+                if start_button_rect.collidepoint(mouse_pos):
+                    game_active = True
+                if start_quit_button_rect.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
 
         if event.type == ANIMATION: #   animation
             
@@ -452,101 +541,117 @@ while True:
             if keys[pygame.K_3]:
                 floor_shown_surface = floor_3_surface
     
-    
-    #   show only the ui when the ui is opened
-    if ui_bg_showing:
+    if game_active:
+        #   show only the ui when the ui is opened
+        if ui_bg_showing:
         
-        SCREEN.blit(ui_bg_surface, ui_bg_rect)
+            SCREEN.blit(ui_bg_surface, ui_bg_rect)
         
-        SCREEN.blit(ui_x_surface, ui_x_rect)
+            SCREEN.blit(ui_x_surface, ui_x_rect)
         
-        if ui_shown == 'checklist':
+            if ui_shown == 'checklist':
             
-            SCREEN.blit(checklist_surface, checklist_rect)
-            for i in range(no_of_items): #    iterate through the items to check if they're found
-                if item_list[i].found:
-                    pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
+                SCREEN.blit(checklist_surface, checklist_rect)
+                for i in range(no_of_items): #    iterate through the items to check if they're found
+                    if item_list[i].found:
+                        pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
                     
-        if ui_shown == 'map':
+            if ui_shown == 'map':
             
-            player_location_surface = FONT.render(player_location,True,(0,0,0)) 
-            player_location_rect = player_location_surface.get_rect(center = (450,500))
+                player_location_surface = FONT.render(player_location,True,(0,0,0)) 
+                player_location_rect = player_location_surface.get_rect(center = (450,500))
             
-            # map_thief_con_rect = map_thief_icon_surface.get_rect(center = ())
+                # map_thief_con_rect = map_thief_icon_surface.get_rect(center = ())
+                for room in room_list:
+                    if player_location == room.name:
+                        map_thief_con_rect = map_thief_icon_surface.get_rect(center = room.map_coords)
+
+                # use the current floor to determine which floor is shown on the map ui
+                SCREEN.blit(map_list[current_floor - 1],map_list[current_floor - 1].get_rect(center = (450,250)))
+
+                SCREEN.blit(player_location_surface, player_location_rect)
+                SCREEN.blit(map_thief_icon_surface,map_thief_con_rect)
+            
+        #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
+        else:
+        
+            moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items)
+    
+            #check what room the player's in
             for room in room_list:
-                if player_location == room.name:
-                    map_thief_con_rect = map_thief_icon_surface.get_rect(center = room.map_coords)
+                player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
+        
+            #check what floor the player's in
+            if floor_shown_surface == floor_1_surface:
+                current_floor = 1
+            elif floor_shown_surface == floor_2_surface:
+                current_floor = 2
+            elif floor_shown_surface == floor_3_surface:
+                current_floor = 3
 
-            # use the current floor to determine which floor is shown on the map ui
-            SCREEN.blit(map_list[current_floor - 1],map_list[current_floor - 1].get_rect(center = (450,250)))
+            # update the current sprite based on the animation frame
+            current_sprite = THIEF_SPRITES[thief_frame]
+            thief.surface = current_sprite
 
-            SCREEN.blit(player_location_surface, player_location_rect)
-            SCREEN.blit(map_thief_icon_surface,map_thief_con_rect)
+            # update floor position and floor
+            floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
+    
+            if thief.rect.colliderect(stair_1_top.rect):
+                floor_shown_surface = floor_2_surface
+            elif thief.rect.colliderect(stair_2_down.rect):
+                floor_shown_surface = floor_1_surface
+            elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
+                floor_shown_surface = floor_3_surface
+            elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
+                floor_shown_surface = floor_2_surface
             
-    #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
+            #check if any items are found
+            for item in item_list:
+                items_collected = item.find_items(map_offset[0],map_offset[1],current_floor, items_collected)
+            
+            # draw everything
+            SCREEN.fill((0, 0, 0))
+            SCREEN.blit(floor_shown_surface, floor_rect)
+        
+            #   walls
+            current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
+            # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
+
+            #   doors
+            current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
+        
+            #   items
+            for i in item_list:
+                i.draw_items(map_offset[0], map_offset[1],current_floor)
+            
+            # unlocking doors and hidden exits
+            for door in current_door_list:
+                door.draw_doors(SCREEN,map_offset[0],map_offset[1])
+                door.unlock_hidden_exit(items_collected, no_of_items)
+        
+            if master_key_item.found and current_floor == 2:
+                            current_door_list[0].door_unlock()
+                        
+            if fire_exit_key_item.found and current_floor == 3:
+                    current_door_list[0].door_unlock()
+                    
+            if door_dialogue_surface and door_dialogue_rect:
+                draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
+            else:
+                draw_dialogue(False, SCREEN, None, None)
+            
+            if hidden_exit_dialogue_surface and hidden__exit_dialogue_rect:
+                SCREEN.blit(hidden_exit_dialogue_surface, hidden__exit_dialogue_rect)
+            
+            SCREEN.blit(thief.surface, thief.rect)
+            SCREEN.blit(map_button_surface, map_button_rect)
+            SCREEN.blit(checklist_button_surface, checklist_button_rect)
+    
     else:
         
-        moving, door_dialogue_surface, door_dialogue_rect = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT)
-    
-        #check what room the player's in
-        for room in room_list:
-            player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
-        
-        #check what floor the player's in
-        if floor_shown_surface == floor_1_surface:
-            current_floor = 1
-        elif floor_shown_surface == floor_2_surface:
-            current_floor = 2
-        elif floor_shown_surface == floor_3_surface:
-            current_floor = 3
+        SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
+        SCREEN.blit(start_screen_surface,start_screen_rect)
 
-        # update the current sprite based on the animation frame
-        current_sprite = THIEF_SPRITES[thief_frame]
-        thief.surface = current_sprite
-
-        # update floor position and floor
-        floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
-    
-        if thief.rect.colliderect(stair_1_top.rect):
-            floor_shown_surface = floor_2_surface
-        elif thief.rect.colliderect(stair_2_down.rect):
-            floor_shown_surface = floor_1_surface
-        elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
-            floor_shown_surface = floor_3_surface
-        elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
-            floor_shown_surface = floor_2_surface
-            
-        # draw everything
-        SCREEN.fill((0, 0, 0))
-        SCREEN.blit(floor_shown_surface, floor_rect)
-        
-        #check if any items are found
-        for item in item_list:
-            item.find_items(map_offset[0],map_offset[1],current_floor, item_dialogue_showing, SCREEN)
-    
-        for i in item_list:
-            i.draw_items(map_offset[0], map_offset[1],current_floor)
-            
-    
-        #   walls
-        current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
-        # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
-        #   doors
-        current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
-
-        for door in current_door_list:
-            door.draw_doors(SCREEN,map_offset[0],map_offset[1])
-        if master_key_item.found and current_floor == 2:
-                    current_door_list[0].door_unlock()
-        if door_dialogue_surface and door_dialogue_rect:
-            draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
-        else:
-            draw_dialogue(False, SCREEN, None, None)
-            
-        SCREEN.blit(thief.surface, thief.rect)
-        SCREEN.blit(map_button_surface, map_button_rect)
-        SCREEN.blit(checklist_button_surface, checklist_button_rect)
-        
     pygame.display.update()
     clock.tick(60)  # frame rate
     

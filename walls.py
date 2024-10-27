@@ -272,6 +272,7 @@ def create_walls(Wall, cx, cy, current_floor):
     powder_room_right_bottom = Wall(775 - cx, 235 - cy, 10, 50)
     wall_list[2].append(powder_room_right_bottom)
     
+    
     #bathroom
     #walls
     bathroom_left_top = Wall(815+190 - cx, 135 - cy, 10, 80)
@@ -362,9 +363,8 @@ def create_walls(Wall, cx, cy, current_floor):
     fire_left = Wall(1165 - cx, 135 - cy, 10, 260-135)
     wall_list[3].append(fire_left)
     
-    # fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
-    # wall_list[3].append(fire_bottom)
-    
+    fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
+    wall_list[3].append(fire_bottom)
     
     # outside walls
     floor_3_top = Wall(495 - cx, 135 - cy, 1295-495, 40)
