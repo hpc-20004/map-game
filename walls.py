@@ -362,8 +362,8 @@ def create_walls(Wall, cx, cy, current_floor):
     fire_left = Wall(1165 - cx, 135 - cy, 10, 260-135)
     wall_list[3].append(fire_left)
     
-    fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
-    wall_list[3].append(fire_bottom)
+    # fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
+    # wall_list[3].append(fire_bottom)
     
     
     # outside walls
