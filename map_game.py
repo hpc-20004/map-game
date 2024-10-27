@@ -131,13 +131,18 @@ class Player:
                     if items_collected < no_of_items: #   fire exit unlocked before collecting all items
                         
                         hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "There's still more to steal!")
-
-                        print("there's still some items to collect")
                         
                     else:
-                        hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "game won")
-                        print("game won")
+                        # hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "game won")
                         
+                        if door.room == "Powder Room Window":
+                            ending = "Powder Room Window"
+                        elif door.room == "Front Door":
+                            ending = "Front Door"
+                        elif door.room == "Fire Exit":
+                            ending = "Fire Exit"
+                        
+                        return ending
                 else:
                     hidden_exit_dialogue_surface, hidden__exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None)
             else:
@@ -648,7 +653,9 @@ while True:
             SCREEN.blit(checklist_button_surface, checklist_button_rect)
     
     else:
-        
+        start_bg_screen_rect.centerx -= 1
+        if start_bg_screen_rect.centerx <= -450:
+            start_bg_screen_rect.centerx = 450
         SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
         SCREEN.blit(start_screen_surface,start_screen_rect)
 
