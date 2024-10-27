@@ -86,20 +86,41 @@ class Player:
         #   check for collisions with doors
         for door in doors:
             door.draw_doors(SCREEN, map_offset[0], map_offset[1])
+            x_distance_from_door = self.x - door.rect.x
+            y_distance_from_door = self.y - door.rect.y
         
-            if door.locked == True and self.rect.colliderect(door.rect):
-                # prevent player from walking into door
-                if x > 0:  #    moving right, push map back to the left
-                    x = 0
-                if x < 0:  #    moving left, push map back to the right
-                    x = 0
-                if y > 0:  #    moving down, push map back up
-                    y = 0
-                if y < 0:  #    moving up, push map back down
-                    y = 0
+            if door.locked:
 
-                # create door locked dialogue
-                door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                if x_distance_from_door > 0: # doors on the left of player
+                    if x_distance_from_door < 30:
+                        if door.orientation == 'horizontal':
+                            x = -1  # sort of 'knockback' the player so they don't get stuck and it's also visual feedback that they can't go in
+                            
+                            # create door locked dialogue
+                            door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                    
+                if x_distance_from_door < 0: # doors on the right of player
+                    if x_distance_from_door > -30:
+                        if door.orientation == 'horizontal':
+                            x = 1
+                            # create door locked dialogue
+                            door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                            
+                if y_distance_from_door > 0: # door above player
+                    if y_distance_from_door < 80:
+                        if door.orientation == 'vertical':
+                            if 0 < x_distance_from_door < door.w: #   only stops the player from going up when they're aligned with the door
+                                y = -1
+                                # create door locked dialogue
+                                door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
+                    
+                if y_distance_from_door < 0: # door below player
+                    if y_distance_from_door > -80:
+                        if door.orientation == 'vertical':
+                            if 0 < x_distance_from_door < door.w:
+                                y = -1
+                                # create door locked dialogue
+                                door_dialogue_surface, door_dialogue_rect = door.locked__dialogue(FONT)
 
         #   change the offset based on how the map has moved
         map_offset[0] += x
@@ -506,7 +527,6 @@ while True:
         for i in item_list:
             i.draw_items(map_offset[0], map_offset[1],current_floor)
             
-        SCREEN.blit(thief.surface, thief.rect)
     
         #   walls
         current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
@@ -522,7 +542,8 @@ while True:
             draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
         else:
             draw_dialogue(False, SCREEN, None, None)
-        
+            
+        SCREEN.blit(thief.surface, thief.rect)
         SCREEN.blit(map_button_surface, map_button_rect)
         SCREEN.blit(checklist_button_surface, checklist_button_rect)
         
