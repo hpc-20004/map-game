@@ -332,12 +332,11 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
         SCREEN.blit(door_dialogue_surface,door_dialogue_rect)
     
 #   reset game
-def reset_game(game_over, floor_shown_surface, items_collected, MAP_X, MAP_Y, ending, item_list, current_door_list):
+def reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset):
     game_over = False
     floor_shown_surface = floor_1_surface
     items_collected = 0
-    MAP_X = 540
-    MAP_Y = -50
+    map_offset = [0,0]
     ending = None
     
     #   re lock doors
@@ -349,7 +348,7 @@ def reset_game(game_over, floor_shown_surface, items_collected, MAP_X, MAP_Y, en
     for item in item_list:
         item.found = False
     
-    return game_over, floor_shown_surface, items_collected, MAP_X, MAP_Y, ending, item_list, current_door_list
+    return game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset
 
 #   variables and constants
 #   game states
@@ -371,12 +370,15 @@ player_location = 0
 current_floor = 1 # player starts at ground level
 items_collected = 0
 ending = None
+no_of_items = 7
 
 #   UI
 ui_bg_showing = False
 ui_shown = 0 #  should be either map or checklist
-no_of_items = 7
+
 CHECKLIST_RED = (153,0,0)
+
+instructions_showing = False
 
 #   text
 FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
@@ -516,6 +518,10 @@ start_bg_screen_rect = start_bg_screen_surface.get_rect(center =(450,300))
 start_button_rect = pygame.Rect(250,485,100,40)
 start_quit_button_rect = pygame.Rect(550,485,100,40)
 
+#   instructions
+instructions_surface = pygame.image.load("assets/images/UI/instructions.png").convert_alpha()
+instructions_rect = instructions_surface.get_rect(center = (450,300))
+
 # game loop
 while True:
     keys = pygame.key.get_pressed()
@@ -530,9 +536,6 @@ while True:
             print(pygame.mouse.get_pos())  # for checking coordinates
             print(map_offset[0])
             print(map_offset[1])
-            print(player_location)
-            print("current floor {}".format(current_floor))
-            print(items_collected)
 
             #   clicking buttons
             mouse_pos = pygame.mouse.get_pos() 
@@ -559,17 +562,20 @@ while True:
                         ui_bg_showing = False
                         
             else:            
-                #   start button clicked
-                if start_button_rect.collidepoint(mouse_pos):
+                if not instructions_showing: #  buttons only work when the start screens showing not while instructions are showing
                     
-                    game_active = True
-                    #   reset game
-                    game_over, floor_shown_surface, items_collected, MAP_X, MAP_Y, ending, item_list, current_door_list = reset_game(game_over, floor_shown_surface, items_collected, MAP_X, MAP_Y, ending, item_list, current_door_list)
-                    print(current_floor,MAP_X,MAP_Y)
-                #   quit button clicked
-                if start_quit_button_rect.collidepoint(mouse_pos):
-                    pygame.quit()
-                    sys.exit()
+                    #   start button clicked
+                    if start_button_rect.collidepoint(mouse_pos):
+                    
+                        #   reset game
+                        game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset = reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset)
+
+                        instructions_showing = True                    
+
+                    #   quit button clicked
+                    if start_quit_button_rect.collidepoint(mouse_pos):
+                        pygame.quit()
+                        sys.exit()
 
         if event.type == ANIMATION: #   animation
             
@@ -595,9 +601,15 @@ while True:
                 if game_over:
                     game_active = False
                     game_over = False
+                if instructions_showing:
+                    game_active = True
+
+    
     
     if game_active:
-        
+
+        instructions_showing = False
+
         if not game_over:
             #   show only the ui when the ui is opened
             if ui_bg_showing:
@@ -722,8 +734,14 @@ while True:
         if start_bg_screen_rect.centerx <= -450:
             start_bg_screen_rect.centerx = 450
             
+            
         SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
-        SCREEN.blit(start_screen_surface,start_screen_rect)
+        
+        if instructions_showing:
+            SCREEN.blit(instructions_surface, instructions_rect)
+        else:
+            SCREEN.blit(start_screen_surface,start_screen_rect)
+            
 
     pygame.display.update()
     clock.tick(60)  # frame rate
