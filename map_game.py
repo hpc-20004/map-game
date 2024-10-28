@@ -350,7 +350,7 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
 def reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played):
     game_over = False
     floor_shown_surface = floor_1_surface
-    items_collected = 0
+    items_collected = 7
     map_offset = [0,0]
     ending = None
     time_left = 5 * 60
@@ -397,6 +397,7 @@ ui_shown = 0 #  should be either map or checklist
 CHECKLIST_RED = (153,0,0)
 
 instructions_showing = False
+credits_showing = False
 
 #   text
 FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
@@ -641,7 +642,7 @@ while True:
             if keys[pygame.K_d]:
                 thief_frame = (thief_frame + 1) % 3 + 3  
                 
-        if event.type == pygame.KEYDOWN: #  testing floors
+        if event.type == pygame.KEYDOWN:
             
             keys = pygame.key.get_pressed()
             if keys[pygame.K_1]:
@@ -650,11 +651,21 @@ while True:
                 floor_shown_surface = floor_2_surface
             if keys[pygame.K_3]:
                 floor_shown_surface = floor_3_surface
+                
             if keys[pygame.K_SPACE]:
-                if game_over:
+                if game_over and not credits_showing:
+                    
+                    print(credits_showing)
+                    credits_showing = True
+                    
+                elif credits_showing:
+                    
+                    credits_showing = False
                     game_active = False
                     game_over = False
-                if instructions_showing:
+                    
+                elif instructions_showing:
+                    
                     game_active = True
                     
     if not channel1.get_busy(): #   so it stops trying to play it over and over every second
@@ -796,20 +807,29 @@ while True:
                             channel2.play(siren)
                     
                     end_sound_played = True #   only make sound play once
-
-                    start_bg_screen_rect.centerx -= 1
-                    if start_bg_screen_rect.centerx <= - SCREEN_CENTER_X:
-                        start_bg_screen_rect.centerx = SCREEN_CENTER_X
-            
+                    
                     SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
-                    SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
+
+                    if credits_showing:
+                        credits_rect.centery -= 1 # scrolling upwards animation
+                        if credits_rect.centery <= - SCREEN_CENTER_Y:
+                            credits_rect.centery = SCREEN_CENTER_Y * 2
+                        
+                        SCREEN.blit(credits_surface, credits_rect)
+                    else:
+                        start_bg_screen_rect.centerx -= 1
+                        if start_bg_screen_rect.centerx <= - SCREEN_CENTER_X:
+                            start_bg_screen_rect.centerx = SCREEN_CENTER_X
+
+                        SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
+
                     SCREEN.blit(press_space_dialogue_surface, press_space_dialogue_rect)
     else:
         #   start screen
         hidden_exit_dialogue_surface = None
         hidden_exit_dialogue_rect = None
         
-        start_bg_screen_rect.centerx -= 1
+        start_bg_screen_rect.centerx -= 1 # scrolling sideways animation
         if start_bg_screen_rect.centerx <= - SCREEN_CENTER_X:
             start_bg_screen_rect.centerx = SCREEN_CENTER_X
             
