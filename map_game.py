@@ -24,6 +24,15 @@ clock = pygame.time.Clock()
 ANIMATION = pygame.USEREVENT
 pygame.time.set_timer(ANIMATION, 200)#  rate
 
+#   time limit
+time_left = 5 * 60 #   5 minutes
+
+timer_event = pygame.USEREVENT+1
+pygame.time.set_timer(timer_event, 1000)
+
+minutes = time_left // 60
+seconds = time_left % 60
+
 #   create display surface 900 x 600
 SCREEN = pygame.display.set_mode((900,600))
 screen_rect = SCREEN.get_rect()
@@ -89,24 +98,26 @@ class Player:
             x_distance_from_door = self.x - door.rect.x
             y_distance_from_door = self.y - door.rect.y
             x_door_hit = door.w * 2
-            y_door_hit = door.l + 20
+            y_door_hit = door.l + 30
         
             if door.locked:
 
                 if x_distance_from_door > 0: # doors on the left of player
                     if x_distance_from_door < x_door_hit:
-                        if door.orientation == 'horizontal':
-                            x = -1  # sort of 'knockback' the player so they don't get stuck and it's also visual feedback that they can't go in
+                        if y_distance_from_door < y_door_hit and y_distance_from_door > - y_door_hit:
+                            if door.orientation == 'horizontal':
+                                x = -1  # sort of 'knockback' the player so they don't get stuck and it's also visual feedback that they can't go in
                             
-                            # create door locked dialogue
-                            door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
+                                # create door locked dialogue
+                                door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
                     
                 if x_distance_from_door < 0: # doors on the right of player
                     if x_distance_from_door > - x_door_hit:
-                        if door.orientation == 'horizontal':
-                            x = 1
-                            # create door locked dialogue
-                            door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
+                        if y_distance_from_door < y_door_hit and y_distance_from_door > - y_door_hit:
+                            if door.orientation == 'horizontal':
+                                x = 1
+                                # create door locked dialogue
+                                door_dialogue_surface, door_dialogue_rect = door.locked_dialogue(FONT)
                             
                 if y_distance_from_door > 0: # door above player
                     if y_distance_from_door < y_door_hit:
@@ -332,12 +343,13 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
         SCREEN.blit(door_dialogue_surface,door_dialogue_rect)
     
 #   reset game
-def reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset):
+def reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left):
     game_over = False
     floor_shown_surface = floor_1_surface
     items_collected = 0
     map_offset = [0,0]
     ending = None
+    time_left = 5 * 60
     
     #   re lock doors
     for door in current_door_list:
@@ -348,7 +360,7 @@ def reset_game(game_over, floor_shown_surface, items_collected, ending, item_lis
     for item in item_list:
         item.found = False
     
-    return game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset
+    return game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left
 
 #   variables and constants
 #   game states
@@ -382,8 +394,13 @@ instructions_showing = False
 
 #   text
 FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',40)
+LARGE_FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',70)
+
 door_dialogue_showing = False
 item_dialogue_showing = False
+
+time_left_surface = FONT.render(f"{minutes}:{seconds:02}", True, (255, 255, 255))
+time_left_rect = time_left_surface.get_rect(center = (100,70))
 
 #   audio
 cha_ching = pygame.mixer.Sound('assets/audio/cha-ching-sound.mp3')
@@ -531,6 +548,16 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+            
+        if event.type == timer_event:
+            if game_active: #   time ticks only when the game is running
+                time_left -= 1
+                
+                minutes = time_left // 60
+                seconds = time_left % 60
+                
+                time_left_surface = FONT.render(f"{minutes}:{seconds:02}", True, (255, 255, 255))
+                time_left_rect = time_left_surface.get_rect(center = (100,70))
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             print(pygame.mouse.get_pos())  # for checking coordinates
@@ -541,6 +568,7 @@ while True:
             mouse_pos = pygame.mouse.get_pos() 
             
             if game_active:
+                
                 if ui_bg_showing == False:
                 
                     if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
@@ -568,7 +596,7 @@ while True:
                     if start_button_rect.collidepoint(mouse_pos):
                     
                         #   reset game
-                        game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset = reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset)
+                        game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left = reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left)
 
                         instructions_showing = True                    
 
@@ -604,11 +632,15 @@ while True:
                 if instructions_showing:
                     game_active = True
 
-    
-    
+    #   if the game's running
     if game_active:
 
-        instructions_showing = False
+        instructions_showing = False #  instructions can't be displayed while they're playing
+        
+        #   lose if time's out
+        if time_left == 0:
+            ending = game_endings[3]
+            game_over = True
 
         if not game_over:
             #   show only the ui when the ui is opened
@@ -684,7 +716,7 @@ while True:
         
                 #   walls
                 current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
-                # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
+                draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
 
                 #   doors
                 current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
@@ -713,27 +745,34 @@ while True:
                     SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
             
                 SCREEN.blit(thief.surface, thief.rect)
+                SCREEN.blit(time_left_surface, time_left_rect)
                 SCREEN.blit(map_button_surface, map_button_rect)
                 SCREEN.blit(checklist_button_surface, checklist_button_rect)
         else:
             #   game end
             if game_over:
                 if ending:
-                    hidden_exit_dialogue_surface = FONT.render(ending,True,(255,255,255))
-                    hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (450,500))
+                    hidden_exit_dialogue_surface = LARGE_FONT.render(ending,True,(255,255,255))
+                    hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (450,300))
                     
+                    press_space_dialogue_surface = FONT.render("PRESS SPACE TO CONTINUE", True, (255,255,255))
+                    press_space_dialogue_rect = press_space_dialogue_surface.get_rect(center = (450,500))
+                    
+                    start_bg_screen_rect.centerx -= 1
+                    if start_bg_screen_rect.centerx <= -450:
+                        start_bg_screen_rect.centerx = 450
+            
                     SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
                     SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
+                    SCREEN.blit(press_space_dialogue_surface, press_space_dialogue_rect)
     else:
         #   start screen
-
         hidden_exit_dialogue_surface = None
         hidden_exit_dialogue_rect = None
         
         start_bg_screen_rect.centerx -= 1
         if start_bg_screen_rect.centerx <= -450:
             start_bg_screen_rect.centerx = 450
-            
             
         SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
         

@@ -1,3 +1,6 @@
+from base64 import b16decode
+
+
 def create_walls(Wall, cx, cy, current_floor):
     # Initialize a dictionary to hold walls for each floor
     wall_list = {
@@ -242,6 +245,15 @@ def create_walls(Wall, cx, cy, current_floor):
     master_right_bottom = Wall(750-260 - cx, 520+35+75+140 - cy, 10, 260)
     wall_list[2].append(master_right_bottom)
     
+    #   furniture
+    master_bed = Wall(205 - cx, 810 - cy, 100, 50)
+    wall_list[2].append(master_bed)
+
+    master_table = Wall(280 - cx, 940 - cy, 150, 30)
+    wall_list[2].append(master_table)
+    
+    master_desk = Wall(415 - cx, 770 - cy, 75, 100)
+    wall_list[2].append(master_desk)
     
     #ensuite
     ensuite_left = Wall(205 - cx, 650 - cy, 45, 40)
@@ -264,14 +276,17 @@ def create_walls(Wall, cx, cy, current_floor):
     bedroom_2_right_bottom = Wall(585 - cx, 555-80 - cy, 10, 80)
     wall_list[2].append(bedroom_2_right_bottom)
     
+    #   furniture
+    bed_2 = Wall(205 - cx, 205 - cy, 100, 40)
+    wall_list[2].append(bed_2)
+    
     #powder room
     #walls
     powder_room_bottom = Wall(585 - cx, 260 - cy, 190, 40)
     wall_list[2].append(powder_room_bottom)
 
-    powder_room_right_bottom = Wall(775 - cx, 235 - cy, 10, 50)
+    powder_room_right_bottom = Wall(775 - cx, 235 - cy, 10, 80)
     wall_list[2].append(powder_room_right_bottom)
-    
     
     #bathroom
     #walls
@@ -284,6 +299,13 @@ def create_walls(Wall, cx, cy, current_floor):
     bathroom_bottom = Wall(815+190 - cx, 360 - cy, 290, 40)
     wall_list[2].append(bathroom_bottom)
     
+    bathroom_top = Wall(1005 - cx, 135 - cy, 1295-1005, 80)
+    wall_list[2].append(bathroom_top)
+
+    #   furniture
+    tub = Wall(1215 - cx, 315 - cy, 55, 20)
+    wall_list[2].append(tub)
+    
     #bedroom 3
     #walls
     bedroom_3_left_top = Wall(1105+190 - cx, 135 - cy, 10, 360-135+100-20)
@@ -292,6 +314,10 @@ def create_walls(Wall, cx, cy, current_floor):
     bedroom_3_4_left = Wall(1295 - cx, 515 - cy, 10, 215)
     wall_list[2].append(bedroom_3_4_left) 
     
+    #   furniture   
+    bed_3 = Wall(1500 - cx, 190 - cy, 100, 50)
+    wall_list[2].append(bed_3)
+    
     #bedroom 4
     #walls
     bedroom_4_top = Wall(1295 -cx, 580 - cy, 350, 40)
@@ -299,6 +325,10 @@ def create_walls(Wall, cx, cy, current_floor):
     
     bedroom_4_left = Wall(1295 - cx, 800 -cy, 10, 230)
     wall_list[2].append(bedroom_4_left)
+    
+    #   furniture
+    bed_4 = Wall(1500 - cx, 635 - cy, 100, 50)
+    wall_list[2].append(bed_4)
 
     #outside walls
     floor_2_bottom = Wall(205 - cx, 1030 - cy, 1645-210, 10)
@@ -337,6 +367,12 @@ def create_walls(Wall, cx, cy, current_floor):
     right_3_down = Wall(1170 - cx, 920 - cy, 10, 100)
     wall_list[3].append(right_3_down)
     
+    left_3_railing = Wall(550 - cx, 920 - cy, 10, 100)
+    wall_list[3].append(left_3_railing)
+
+    right_3_railing = Wall(1200 - cx, 920 - cy, 10, 100)   
+    wall_list[3].append(right_3_railing)
+
     # art gallery
     # walls
     art_top_left = Wall(495 - cx, 425 - cy, 105, 40)
@@ -345,25 +381,46 @@ def create_walls(Wall, cx, cy, current_floor):
     art_top_right = Wall(675 - cx, 425 - cy, 815-675, 40)
     wall_list[3].append(art_top_right)
     
+    #   furniture
+    art_chair = Wall(515 - cx, 610 - cy, 30, 20)
+    wall_list[3].append(art_chair)
+    
     # vault
     # walls
-    vault_mus = Wall(815 - cx, 135 - cy, 10, 335)
+    vault_mus = Wall(815 - cx, 135 - cy, 10, 325)
     wall_list[3].append(vault_mus)
+
+    #   furniture
+    vault_chair = Wall(515 - cx, 280 - cy, 40,40)
+    wall_list[3].append(vault_chair)
+    
+    vault_mirror = Wall(755 - cx, 270 - cy, 40, 50)
+    wall_list[3].append(vault_mirror)
     
     # music room
     # walls 
     mus_left = Wall(815 - cx, 540 - cy, 10, 40)
     wall_list[3].append(mus_left)
+    
+    mus_top = Wall(495 - cx, 150 - cy, 320, 40)
+    wall_list[3].append(mus_top)
 
     mus_bottom = Wall(815 - cx, 580 - cy, 1295-815, 40)
     wall_list[3].append(mus_bottom)
+    
+    #   furniture
+    mus_chair = Wall(830 - cx, 240 - cy, 40, 40)
+    wall_list[3].append(mus_chair)
+    
+    mus_piano = Wall(1095 - cx, 435 - cy, 100, 50)
+    wall_list[3].append(mus_piano)
     
     # fire exit
     # walls
     fire_left = Wall(1165 - cx, 135 - cy, 10, 260-135)
     wall_list[3].append(fire_left)
     
-    fire_bottom = Wall(1165 - cx, 260 - cy, 1295, 40)
+    fire_bottom = Wall(1165 - cx, 260 - cy, 1295-1165, 40)
     wall_list[3].append(fire_bottom)
     
     # outside walls
