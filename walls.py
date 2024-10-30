@@ -1,6 +1,3 @@
-from base64 import b16decode
-
-
 def create_walls(Wall, cx, cy, current_floor):
     # Initialize a dictionary to hold walls for each floor
     wall_list = {
@@ -86,7 +83,7 @@ def create_walls(Wall, cx, cy, current_floor):
     cleaning_top = Wall(555 - cx, 260 - cy, 785-560, 10)
     wall_list[1].append(cleaning_top)
     
-    cleaning_bottom_left = Wall(560 - cx, 485 - cy, 640-560, 10)
+    cleaning_bottom_left = Wall(560 - cx, 485 - cy, 640-575, 10)
     wall_list[1].append(cleaning_bottom_left)
 
     # furniture
@@ -100,7 +97,7 @@ def create_walls(Wall, cx, cy, current_floor):
     wall_list[1].append(cleaning_bench_2)
 
     # kitchen
-    kit_cle_bottom = Wall(710 - cx, 485 - cy, 1020-710, 10)
+    kit_cle_bottom = Wall(720 - cx, 485 - cy, 1020-730, 10)
     wall_list[1].append(kit_cle_bottom)
     
     kit_bottom_mid = Wall(1090 - cx, 485 - cy, 1135-1090, 10)
@@ -195,10 +192,10 @@ def create_walls(Wall, cx, cy, current_floor):
     foyer_right = Wall(1105 - cx, 1030 - cy, 10, 1160-1030)
     wall_list[1].append(foyer_right)
     
-    foyer_bottom_left = Wall(685 - cx, 1160 - cy, 860-685, 10)
+    foyer_bottom_left = Wall(685 - cx, 1160 - cy, 860-700, 10)
     wall_list[1].append(foyer_bottom_left)
     
-    foyer_bottom_right = Wall(925 - cx, 1160 - cy, 1105-925, 10)
+    foyer_bottom_right = Wall(940 - cx, 1160 - cy, 1105-925, 10)
     wall_list[1].append(foyer_bottom_right)
 
     # stair walls
@@ -285,7 +282,7 @@ def create_walls(Wall, cx, cy, current_floor):
     powder_room_bottom = Wall(585 - cx, 260 - cy, 190, 40)
     wall_list[2].append(powder_room_bottom)
 
-    powder_room_right_bottom = Wall(775 - cx, 235 - cy, 10, 80)
+    powder_room_right_bottom = Wall(775 - cx, 245 - cy, 10, 80)
     wall_list[2].append(powder_room_right_bottom)
     
     #bathroom
@@ -399,7 +396,7 @@ def create_walls(Wall, cx, cy, current_floor):
     
     # music room
     # walls 
-    mus_left = Wall(815 - cx, 540 - cy, 10, 40)
+    mus_left = Wall(815 - cx, 550 - cy, 10, 40)
     wall_list[3].append(mus_left)
     
     mus_top = Wall(495 - cx, 150 - cy, 320, 40)

@@ -61,7 +61,7 @@ class Player:
         self.x = x 
         self.y = y
 
-    def player_movement(self, walls, doors, map_offset, FONT, items_collected, no_of_items, game_endings):
+    def player_movement(self, walls, doors, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         door_dialogue_surface, door_dialogue_rect = None, None
@@ -103,6 +103,9 @@ class Player:
             y_distance_from_door = self.y - door.rect.y
             x_door_hit = door.w * 2
             y_door_hit = door.l + 30
+            
+            #   initiate values:
+            hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
         
             if door.locked:
 
@@ -144,7 +147,7 @@ class Player:
                 if self.rect.colliderect(door.rect):
                     
                     if items_collected < no_of_items: #   fire exit unlocked before collecting all items
-                        
+                        print("aaa")
                         hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "There's still more to steal!", SCREEN_CENTER_X)
                         
                     else:
@@ -153,27 +156,31 @@ class Player:
                         
                         game_over = True
                         
+                        #   check which exit is reached
                         if door.room == "Powder Room Window":
                             ending = game_endings[0]
+                            
                         elif door.room == "Front Door":
                             ending = game_endings[1]
+                            
                         elif door.room == "Fire Exit":
                             ending = game_endings[2]
-                           
-                        
-                else:
-                    hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
-                    ending = None
-                    game_over = None
-            else:
-                    hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
-                    ending = None
-                    game_over = None
-
+                            
+                # else:
+                #     # print("not colliding")
+                #     hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
+                 
+            # else:
+            #         # print(str(ending))
+            #         print("aaaa")
+        
+        
+                    
         #   change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
-
+        # print("ending before return: " + str(ending))
+        # print("game_over before return " + str(game_over))
         return self.moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over
     
 #   game item class
@@ -183,7 +190,6 @@ class Item:
         self.name = name
         self.image = image
         if image: #   only make these for items that have an image
-            
             self.surface = pygame.transform.scale(pygame.image.load(image).convert_alpha(),(l,w))
         
         self.x = x
@@ -201,45 +207,23 @@ class Item:
     def find_items(self, map_offset_x, map_offset_y,current_floor,items_collected):
         keys = pygame.key.get_pressed() # to see if c gets pressed
         
-        if not self.found:
+        if not self.found: #    only if item isn't found yet
             
-            if self.floor == current_floor:
+            if self.floor == current_floor: #   only collect items on the same floor
                 
                 if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
                     if keys[pygame.K_c]:
                         
                         self.found = True
                        
-                        items_collected += 1
+                        items_collected += 1    #   add to the number of items that have been collected
                         
                         channel2.play(cha_ching)
                         
-                        return items_collected
-                    
-                    else:
-            
-                        items_collected = items_collected # number of items collected stays the same so the same value is returned
-            
-                        return items_collected
-                else:
-            
-                        items_collected = items_collected # number of items collected stays the same so the same value is returned
-            
-                        return items_collected
-            else:
-            
-                        items_collected = items_collected # number of items collected stays the same so the same value is returned
-            
-                        return items_collected
-        else:
-            
-                        items_collected = items_collected # number of items collected stays the same so the same value is returned
-            
-                        return items_collected
+        return items_collected
         
     def draw_items(self,mox,moy,current_floor):
-
-        if self.found == False and self.image  and self.floor == current_floor:
+        if self.found == False and self.image  and self.floor == current_floor: #   only draw items that haven't been found yet and are on the same floor as the player
             
             self.rect = self.surface.get_rect(center = (self.x+mox, self.y+moy))
             
@@ -263,6 +247,7 @@ class Room:
             if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
                 self.in_room = True
                 return self.name
+            
             else:
                 self.in_room = False
                 return previous_player_location
@@ -272,7 +257,7 @@ class Room:
             return previous_player_location # if they're still in the same room?
 
 class Door: #   doors 70px tall
-    def __init__(self,room, image,x,y,l,w,locked, hidden_exit,orientation):
+    def __init__(self, room, image,x,y,l,w,locked, hidden_exit,orientation):
         self.room = room
         self.image = image
         if image:
@@ -350,7 +335,7 @@ def draw_dialogue(door_dialogue_showing, SCREEN, door_dialogue_surface, door_dia
 def reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played):
     game_over = False
     floor_shown_surface = floor_1_surface
-    items_collected = 7
+    items_collected = 0
     map_offset = [0,0]
     ending = None
     time_left = 5 * 60
@@ -551,7 +536,7 @@ checklist_list = [
 start_screen_surface = pygame.image.load("assets/images/UI/start screen.png").convert_alpha()
 start_screen_rect = start_screen_surface.get_rect(center = (SCREEN_CENTER_X, SCREEN_CENTER_Y))
 
-start_bg_screen_surface = pygame.image.load("assets/images/UI/start bg.png").convert()
+start_bg_screen_surface = pygame.transform.scale(pygame.image.load("assets/images/UI/start bg.png").convert(),(4500,1500))
 start_bg_screen_rect = start_bg_screen_surface.get_rect(center =(SCREEN_CENTER_X, SCREEN_CENTER_Y))
 
 start_button_rect = pygame.Rect(250,485,100,40)
@@ -586,9 +571,9 @@ while True:
                 time_left_rect = time_left_surface.get_rect(center = (100,70))
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print(pygame.mouse.get_pos())  # for checking coordinates
-            print(map_offset[0])
-            print(map_offset[1])
+            # print(pygame.mouse.get_pos())  # for checking coordinates
+            # print(map_offset[0])
+            # print(map_offset[1])
 
             #   clicking buttons
             mouse_pos = pygame.mouse.get_pos() 
@@ -714,9 +699,9 @@ while True:
             
             #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
             else:
-        
-                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items, game_endings)
-    
+                #   player movement
+                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over)
+                # print("game loop: " + str(ending))
                 #check what room the player's in
                 for room in room_list:
                     player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
@@ -768,18 +753,22 @@ while True:
                 for door in current_door_list:
                     door.draw_doors(SCREEN,map_offset[0],map_offset[1])
                     door.unlock_hidden_exit(items_collected, no_of_items)
-        
+                
+                #   unlock master bedroom
                 if master_key_item.found and current_floor == 2:
                                 current_door_list[0].door_unlock()
                         
+                #   unlock fire exit
                 if fire_exit_key_item.found and current_floor == 3:
                         current_door_list[0].door_unlock()
                     
+                #   draw door licked dialogue
                 if door_dialogue_surface and door_dialogue_rect:
                     draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
                 else:
                     draw_dialogue(False, SCREEN, None, None)
             
+                #   draw hidden exit dialogue
                 if hidden_exit_dialogue_surface and hidden_exit_dialogue_rect:
                     SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
             
@@ -791,6 +780,8 @@ while True:
             #   game end
             if game_over:
                 if ending:
+                    # print("game over" + str(ending))
+                    #   show the ending
                     hidden_exit_dialogue_surface = LARGE_FONT.render(ending,True,(255,255,255))
                     hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (SCREEN_CENTER_X, 250))
                     
@@ -808,18 +799,25 @@ while True:
                     
                     end_sound_played = True #   only make sound play once
                     
+                    #   draw start bg
                     SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
 
+                    #   draw credits
                     if credits_showing:
+                        start_bg_screen_rect.centerx = 900  #   reset the start bg position so there's not too much moving at once
+                        
                         credits_rect.centery -= 1 # scrolling upwards animation
+                        
                         if credits_rect.centery <= - SCREEN_CENTER_Y:
                             credits_rect.centery = SCREEN_CENTER_Y * 2
                         
                         SCREEN.blit(credits_surface, credits_rect)
+                        
                     else:
                         start_bg_screen_rect.centerx -= 1
-                        if start_bg_screen_rect.centerx <= - SCREEN_CENTER_X:
-                            start_bg_screen_rect.centerx = SCREEN_CENTER_X
+                        
+                        if start_bg_screen_rect.centerx <= 0:
+                            start_bg_screen_rect.centerx = 900 #    bring it back to the starting position
 
                         SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
 
@@ -830,17 +828,18 @@ while True:
         hidden_exit_dialogue_rect = None
         
         start_bg_screen_rect.centerx -= 1 # scrolling sideways animation
-        if start_bg_screen_rect.centerx <= - SCREEN_CENTER_X:
-            start_bg_screen_rect.centerx = SCREEN_CENTER_X
+        
+        if start_bg_screen_rect.centerx <= 0:
+            start_bg_screen_rect.centerx = 900
             
         SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
         
         if instructions_showing:
             SCREEN.blit(instructions_surface, instructions_rect)
+            
         else:
             SCREEN.blit(start_screen_surface,start_screen_rect)
             
-
     pygame.display.update()
     clock.tick(60)  # frame rate
     
