@@ -61,7 +61,7 @@ class Player:
         self.x = x 
         self.y = y
 
-    def player_movement(self, walls, doors, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over):
+    def player_movement(self, walls, doors, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect):
         keys = pygame.key.get_pressed()
         x, y = 0, 0
         door_dialogue_surface, door_dialogue_rect = None, None
@@ -104,8 +104,6 @@ class Player:
             x_door_hit = door.w * 2
             y_door_hit = door.l + 30
             
-            #   initiate values:
-            hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
         
             if door.locked:
 
@@ -166,16 +164,14 @@ class Player:
                         elif door.room == "Fire Exit":
                             ending = game_endings[2]
                             
-                # else:
-                #     # print("not colliding")
-                #     hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
+                else:
+                    # print("not colliding")
+                    hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
                  
             # else:
             #         # print(str(ending))
             #         print("aaaa")
-        
-        
-                    
+           
         #   change the offset based on how the map has moved
         map_offset[0] += x
         map_offset[1] += y
@@ -390,6 +386,9 @@ LARGE_FONT = pygame.font.Font('assets/fonts/Pixel Lofi.otf',60)
 
 door_dialogue_showing = False
 item_dialogue_showing = False
+
+hidden_exit_dialogue_surface = FONT.render(None , True, (255,255,255))
+hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (SCREEN_CENTER_X,500))
 
 time_left_surface = FONT.render(f"{minutes}:{seconds:02}", True, (255, 255, 255))
 time_left_rect = time_left_surface.get_rect(center = (100,70))
@@ -700,7 +699,7 @@ while True:
             #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
             else:
                 #   player movement
-                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over)
+                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
                 # print("game loop: " + str(ending))
                 #check what room the player's in
                 for room in room_list:
@@ -816,7 +815,7 @@ while True:
                     else:
                         start_bg_screen_rect.centerx -= 1
                         
-                        if start_bg_screen_rect.centerx <= 0:
+                        if start_bg_screen_rect.centerx <= -1350:
                             start_bg_screen_rect.centerx = 900 #    bring it back to the starting position
 
                         SCREEN.blit(hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
@@ -829,8 +828,8 @@ while True:
         
         start_bg_screen_rect.centerx -= 1 # scrolling sideways animation
         
-        if start_bg_screen_rect.centerx <= 0:
-            start_bg_screen_rect.centerx = 900
+        if start_bg_screen_rect.centerx <= -1350: # if the centre of the background image is less than 'starting x' - 'half of width'
+            start_bg_screen_rect.centerx = 900 #    back to the starting x
             
         SCREEN.blit(start_bg_screen_surface, start_bg_screen_rect)
         
