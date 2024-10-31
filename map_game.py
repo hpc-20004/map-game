@@ -145,7 +145,6 @@ class Player:
                 if self.rect.colliderect(door.rect):
                     
                     if items_collected < no_of_items: #   fire exit unlocked before collecting all items
-                        print("aaa")
                         hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "There's still more to steal!", SCREEN_CENTER_X)
                         
                     else:
@@ -204,12 +203,17 @@ class Item:
         keys = pygame.key.get_pressed() # to see if c gets pressed
         
         if not self.found: #    only if item isn't found yet
-            
+            # if self.name == "TV":
+            #     print("aaa")
             if self.floor == current_floor: #   only collect items on the same floor
-                
+                # if self.name == "TV":
+                #     print("aaa")
                 if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
+                    if self.name == "TV":
+                        print("aaa")
                     if keys[pygame.K_c]:
-                        
+                        if self.name == "TV":
+                            print("aaa")
                         self.found = True
                        
                         items_collected += 1    #   add to the number of items that have been collected
