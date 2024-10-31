@@ -28,8 +28,8 @@ pygame.time.set_timer(ANIMATION, 200)#  rate
 #   time limit
 time_left = 5 * 60#   5 minutes
 
-timer_event = pygame.USEREVENT+1
-pygame.time.set_timer(timer_event, 1000)
+TIMER_EVENT = pygame.USEREVENT+1
+pygame.time.set_timer(TIMER_EVENT, 1000)
 
 minutes = time_left // 60
 seconds = time_left % 60
@@ -357,7 +357,7 @@ game_endings = ["Win: Jumped out the window!",
                 "Game over: The owners are back!"]
 
 #   setup
-speed = 3
+SPEED = 3
 MAP_X = 540
 MAP_Y = -50
 collide = False
@@ -367,7 +367,7 @@ player_location = 0
 current_floor = 1 # player starts at ground level
 items_collected = 0
 ending = None
-no_of_items = 7
+NO_OF_ITEMS = 7
 end_sound_played = False
 
 #   UI
@@ -558,7 +558,7 @@ while True:
             pygame.quit()
             sys.exit()
             
-        if event.type == timer_event:
+        if event.type == TIMER_EVENT:
             if game_active: #   time ticks only when the game is running
                 time_left -= 1
                 
@@ -675,7 +675,7 @@ while True:
                 if ui_shown == 'checklist':
             
                     SCREEN.blit(checklist_surface, checklist_rect)
-                    for i in range(no_of_items): #    iterate through the items to check if they're found
+                    for i in range(NO_OF_ITEMS): #    iterate through the items to check if they're found
                         if item_list[i].found:
                             pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
                     
@@ -698,7 +698,7 @@ while True:
             #   the rest of the game runs while ui is shown so player can't accidentally move while ui is showing
             else:
                 #   player movement
-                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, no_of_items, ending, game_endings, game_over, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
+                moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, NO_OF_ITEMS, ending, game_endings, game_over, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
                 # print("game loop: " + str(ending))
                 #check what room the player's in
                 for room in room_list:
@@ -750,7 +750,7 @@ while True:
                 # unlocking doors and hidden exits
                 for door in current_door_list:
                     door.draw_doors(SCREEN,map_offset[0],map_offset[1])
-                    door.unlock_hidden_exit(items_collected, no_of_items)
+                    door.unlock_hidden_exit(items_collected, NO_OF_ITEMS)
                 
                 #   unlock master bedroom
                 if master_key_item.found and current_floor == 2:
