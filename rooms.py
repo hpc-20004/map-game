@@ -26,7 +26,6 @@ def create_rooms(Room):
     room_list.append(living_left)
     room_list.append(living_right)
 
-
     # FLoor 2
     master = Room("Master Bedroom",400,635,-50,335,2,True,False,(260,335))
     room_list.append(master)

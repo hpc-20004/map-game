@@ -145,7 +145,6 @@ class Player:
                 if self.rect.colliderect(door.rect):
                     
                     if items_collected < no_of_items: #   fire exit unlocked before collecting all items
-                        print("aaa")
                         hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, "There's still more to steal!", SCREEN_CENTER_X)
                         
                     else:
@@ -182,7 +181,6 @@ class Player:
 #   game item class
 class Item:
     def __init__(self, name, image, x, y, l, w, min_x_offset, max_x_offset, min_y_offset, max_y_offset, floor, found):
-        
         self.name = name
         self.image = image
         if image: #   only make these for items that have an image
@@ -205,10 +203,8 @@ class Item:
         
         if not self.found: #    only if item isn't found yet
             if self.floor == current_floor: #   only collect items on the same floor
-                
                 if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
                     if keys[pygame.K_c]:
-                        
                         self.found = True
                        
                         items_collected += 1    #   add to the number of items that have been collected
@@ -288,9 +284,9 @@ class Door: #   doors 70px tall
         
     def draw_doors(self,SCREEN,mox,moy):
         if self.image:
-            
             self.rect = self.surface.get_rect(center  = (self.x + (self.w/2) + mox, self.y + (self.l/2) + moy)) #   centre of each door
             SCREEN.blit(self.surface, self.rect)
+            
         else:
             self.rect = pygame.Rect(self.x + mox,self.y + moy,self.w,self.l)
             
@@ -411,32 +407,32 @@ yay = pygame.mixer.Sound('assets/audio/yay.mp3')
 siren = pygame.mixer.Sound('assets/audio/siren.mp3')
 
 #   player
-THIEF_SPRITES = []
-for sprite in range(12):  #tile000.png to tile011.png
-    
-    #   image name
-    sprite_file = f'assets/images/thief/tile{sprite:03}.png'  #:03 so it has 3 digits
-        
-    #   load
-    original_sprite = pygame.image.load(sprite_file).convert()
-        
-    #   get sprite dimensions
-    original_width, original_height = original_sprite.get_size()
-        
-    #   change ONLY height to 55px
-    new_height = 50
-    new_width = (50/original_height) * original_width
-    new_size = (new_width, new_height)
-        
-    resized_sprite = pygame.transform.scale(original_sprite, new_size)
-        
-    #   append to sprite list
-    THIEF_SPRITES.append(resized_sprite)
+THIEF_DIMENSIONS = (37.5,50)
 
-thief = Player(THIEF_SPRITES[8], SCREEN_CENTER_X, SCREEN_CENTER_Y, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
-# thief.rect.center = screen_rect.center
+THIEF_SPRITES = {
+    1: [pygame.transform.scale(pygame.image.load("assets/images/thief/tile000.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile001.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile002.png").convert_alpha(), THIEF_DIMENSIONS)
+        ],  #   facing up
+    2: [pygame.transform.scale(pygame.image.load("assets/images/thief/tile003.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile004.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile005.png").convert_alpha(), THIEF_DIMENSIONS)
+        ],  #   right
+    3: [pygame.transform.scale(pygame.image.load("assets/images/thief/tile006.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile007.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile008.png").convert_alpha(), THIEF_DIMENSIONS)
+        ],  #   down
+    4: [pygame.transform.scale(pygame.image.load("assets/images/thief/tile009.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile010.png").convert_alpha(), THIEF_DIMENSIONS),
+        pygame.transform.scale(pygame.image.load("assets/images/thief/tile011.png").convert_alpha(), THIEF_DIMENSIONS)
+        ]   #   left
+    }
 
-current_sprite = THIEF_SPRITES[8]
+current_sprite_direction = THIEF_SPRITES[3]
+
+current_sprite = current_sprite_direction[2]
+
+thief = Player(current_sprite, SCREEN_CENTER_X, SCREEN_CENTER_Y, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
 
 #   item list
 item_list = []
@@ -577,33 +573,28 @@ while True:
             mouse_pos = pygame.mouse.get_pos() 
             
             if game_active:
-                
                 if ui_bg_showing == False:
-                
                     if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
                         ui_bg_showing = True
                     else:
                         ui_bg_showing = False
                 
                     if map_button_rect.collidepoint(mouse_pos):
-                        print("map clicked")
+                        # print("map clicked")
                         ui_shown = 'map'
                 
                     if checklist_button_rect.collidepoint(mouse_pos):
-                        print("checklist clicked")
+                        # print("checklist clicked")
                         ui_shown = 'checklist'
                     
                 else:
-                
                     if ui_x_rect.collidepoint(mouse_pos):
                         ui_bg_showing = False
                         
             else:            
                 if not instructions_showing: #  buttons only work when the start screens showing not while instructions are showing
-                    
                     #   start button clicked
                     if start_button_rect.collidepoint(mouse_pos):
-                    
                         #   reset game
                         game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played = reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played)
 
@@ -615,48 +606,70 @@ while True:
                         sys.exit()
 
         if event.type == ANIMATION: #   animation
-            
             if keys[pygame.K_w]:
-                thief_frame = (thief_frame - 1) % 3 
+                current_sprite_direction = THIEF_SPRITES[1] #   up
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_s]:
-                thief_frame = (thief_frame + 1) % 3 + 6
+                current_sprite_direction = THIEF_SPRITES[3] #   down
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_a]:
-                thief_frame = (thief_frame + 1) % 3 + 9  
+                current_sprite_direction = THIEF_SPRITES[4] #   left
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_d]:
-                thief_frame = (thief_frame + 1) % 3 + 3  
+                current_sprite_direction = THIEF_SPRITES[2] #   right
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
                 
         if event.type == pygame.KEYDOWN:
-            
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_1]:
-                floor_shown_surface = floor_1_surface
-            if keys[pygame.K_2]:
-                floor_shown_surface = floor_2_surface
-            if keys[pygame.K_3]:
-                floor_shown_surface = floor_3_surface
+            # if keys[pygame.K_1]:
+            #     floor_shown_surface = floor_1_surface
+            # if keys[pygame.K_2]:
+            #     floor_shown_surface = floor_2_surface
+            # if keys[pygame.K_3]:
+            #     floor_shown_surface = floor_3_surface
                 
             if keys[pygame.K_SPACE]:
                 if game_over and not credits_showing:
-                    
-                    print(credits_showing)
+                    # print(credits_showing)
                     credits_showing = True
                     
                 elif credits_showing:
-                    
                     credits_showing = False
                     game_active = False
                     game_over = False
                     
                 elif instructions_showing:
-                    
                     game_active = True
                     
+    #   background music
     if not channel1.get_busy(): #   so it stops trying to play it over and over every second
-        channel1.play(music, loops=-1)
+        channel1.play(music, loops=-1)  #   play on loop
     
     #   if the game's running
     if game_active:
-
         instructions_showing = False #  instructions can't be displayed while they're playing
         
         #   lose if time's out
@@ -673,14 +686,13 @@ while True:
                 SCREEN.blit(ui_x_surface, ui_x_rect)
         
                 if ui_shown == 'checklist':
-            
                     SCREEN.blit(checklist_surface, checklist_rect)
+                    
                     for i in range(no_of_items): #    iterate through the items to check if they're found
                         if item_list[i].found:
                             pygame.draw.rect(SCREEN, CHECKLIST_RED, checklist_list[i])
                     
                 if ui_shown == 'map':
-            
                     player_location_surface = FONT.render(player_location,True,(0,0,0)) 
                     player_location_rect = player_location_surface.get_rect(center = (SCREEN_CENTER_X,500))
             
@@ -713,18 +725,21 @@ while True:
                     current_floor = 3
 
                 # update the current sprite based on the animation frame
-                current_sprite = THIEF_SPRITES[thief_frame]
+                current_sprite = current_sprite_direction[thief_frame]
                 thief.surface = current_sprite
 
                 # update floor position and floor
-                floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
+                floor_rect = floor_shown_surface.get_rect(center = (MAP_X + map_offset[0], MAP_Y + map_offset[1]))
     
                 if thief.rect.colliderect(stair_1_top.rect):
                     floor_shown_surface = floor_2_surface
+                    
                 elif thief.rect.colliderect(stair_2_down.rect):
                     floor_shown_surface = floor_1_surface
+                    
                 elif thief.rect.colliderect(left_2_up) or thief.rect.colliderect(right_2_up):
                     floor_shown_surface = floor_3_surface
+                    
                 elif thief.rect.colliderect(left_3_down) or thief.rect.colliderect(right_3_down):
                     floor_shown_surface = floor_2_surface
             
@@ -763,6 +778,7 @@ while True:
                 #   draw door licked dialogue
                 if door_dialogue_surface and door_dialogue_rect:
                     draw_dialogue(True, SCREEN, door_dialogue_surface, door_dialogue_rect)
+                    
                 else:
                     draw_dialogue(False, SCREEN, None, None)
             
@@ -774,6 +790,7 @@ while True:
                 SCREEN.blit(time_left_surface, time_left_rect)
                 SCREEN.blit(map_button_surface, map_button_rect)
                 SCREEN.blit(checklist_button_surface, checklist_button_rect)
+                
         else:
             #   game end
             if game_over:
@@ -802,7 +819,7 @@ while True:
 
                     #   draw credits
                     if credits_showing:
-                        start_bg_screen_rect.centerx = 900  #   reset the start bg position so there's not too much moving at once
+                        start_bg_screen_rect.centerx = 1350  #   reset the start bg position so there's not too much moving at once
                         
                         credits_rect.centery -= 1 # scrolling upwards animation
                         
