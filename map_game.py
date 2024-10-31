@@ -164,18 +164,13 @@ class Player:
                             ending = game_endings[2]
                             
                 else:
-                    # print("not colliding")
                     hidden_exit_dialogue_surface, hidden_exit_dialogue_rect = door.hidden_exit_dialogue(FONT, None, SCREEN_CENTER_X)
                  
-            # else:
-            #         # print(str(ending))
-            #         print("aaaa")
-           
         #   change the offset based on how the map has moved
         map_offset[0] += x
+        
         map_offset[1] += y
-        # print("ending before return: " + str(ending))
-        # print("game_over before return " + str(game_over))
+        
         return self.moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over
     
 #   game item class
@@ -565,10 +560,6 @@ while True:
                 time_left_rect = time_left_surface.get_rect(center = (100,70))
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # print(pygame.mouse.get_pos())  # for checking coordinates
-            # print(map_offset[0])
-            # print(map_offset[1])
-
             #   clicking buttons
             mouse_pos = pygame.mouse.get_pos() 
             
@@ -580,11 +571,9 @@ while True:
                         ui_bg_showing = False
                 
                     if map_button_rect.collidepoint(mouse_pos):
-                        # print("map clicked")
                         ui_shown = 'map'
                 
                     if checklist_button_rect.collidepoint(mouse_pos):
-                        # print("checklist clicked")
                         ui_shown = 'checklist'
                     
                 else:
@@ -644,16 +633,9 @@ while True:
                 
         if event.type == pygame.KEYDOWN:
             keys = pygame.key.get_pressed()
-            # if keys[pygame.K_1]:
-            #     floor_shown_surface = floor_1_surface
-            # if keys[pygame.K_2]:
-            #     floor_shown_surface = floor_2_surface
-            # if keys[pygame.K_3]:
-            #     floor_shown_surface = floor_3_surface
-                
+            
             if keys[pygame.K_SPACE]:
                 if game_over and not credits_showing:
-                    # print(credits_showing)
                     credits_showing = True
                     
                 elif credits_showing:
@@ -711,7 +693,7 @@ while True:
             else:
                 #   player movement
                 moving, door_dialogue_surface, door_dialogue_rect, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect, ending, game_over = thief.player_movement(current_wall_list, current_door_list, map_offset, FONT, items_collected, NO_OF_ITEMS, ending, game_endings, game_over, hidden_exit_dialogue_surface, hidden_exit_dialogue_rect)
-                # print("game loop: " + str(ending))
+               
                 #check what room the player's in
                 for room in room_list:
                     player_location = room.check_room_location(map_offset[0],map_offset[1],player_location, current_floor)
@@ -753,8 +735,7 @@ while True:
         
                 #   walls
                 current_wall_list, stair_1_top, stair_2_down, left_2_up, right_2_up, left_3_down, right_3_down = create_walls(Wall, CENTER_OFFSET_X, CENTER_OFFSET_Y, current_floor)
-                # draw_walls(current_wall_list, SCREEN, map_offset[0], map_offset[1], current_floor) #get rid of this to make the walls invisible eventually
-
+               
                 #   doors
                 current_door_list = create_doors(Door, CENTER_OFFSET_X, CENTER_OFFSET_Y,current_floor)
         
@@ -795,7 +776,6 @@ while True:
             #   game end
             if game_over:
                 if ending:
-                    # print("game over" + str(ending))
                     #   show the ending
                     hidden_exit_dialogue_surface = LARGE_FONT.render(ending,True,(255,255,255))
                     hidden_exit_dialogue_rect = hidden_exit_dialogue_surface.get_rect(center = (SCREEN_CENTER_X, 250))
