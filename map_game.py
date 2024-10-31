@@ -289,9 +289,9 @@ class Door: #   doors 70px tall
         
     def draw_doors(self,SCREEN,mox,moy):
         if self.image:
-            
             self.rect = self.surface.get_rect(center  = (self.x + (self.w/2) + mox, self.y + (self.l/2) + moy)) #   centre of each door
             SCREEN.blit(self.surface, self.rect)
+            
         else:
             self.rect = pygame.Rect(self.x + mox,self.y + moy,self.w,self.l)
             
@@ -412,32 +412,32 @@ yay = pygame.mixer.Sound('assets/audio/yay.mp3')
 siren = pygame.mixer.Sound('assets/audio/siren.mp3')
 
 #   player
-THIEF_SPRITES = []
-for sprite in range(12):  #tile000.png to tile011.png
-    
-    #   image name
-    sprite_file = f'assets/images/thief/tile{sprite:03}.png'  #:03 so it has 3 digits
-        
-    #   load
-    original_sprite = pygame.image.load(sprite_file).convert()
-        
-    #   get sprite dimensions
-    original_width, original_height = original_sprite.get_size()
-        
-    #   change ONLY height to 55px
-    new_height = 50
-    new_width = (50/original_height) * original_width
-    new_size = (new_width, new_height)
-        
-    resized_sprite = pygame.transform.scale(original_sprite, new_size)
-        
-    #   append to sprite list
-    THIEF_SPRITES.append(resized_sprite)
+THIEF_SPRITES = {
+    1: [pygame.image.load("assets/images/thief/tile000.png").convert(),
+        pygame.image.load("assets/images/thief/tile001.png").convert(),
+        pygame.image.load("assets/images/thief/tile002.png").convert()
+        ],  #   facing up
+    2: [pygame.image.load("assets/images/thief/tile003.png").convert(),
+        pygame.image.load("assets/images/thief/tile004.png").convert(),
+        pygame.image.load("assets/images/thief/tile005.png").convert()
+        ],  #   right
+    3: [pygame.image.load("assets/images/thief/tile006.png").convert(),
+        pygame.image.load("assets/images/thief/tile007.png").convert(),
+        pygame.image.load("assets/images/thief/tile008.png").convert()
+        ],  #   down
+    4: [pygame.image.load("assets/images/thief/tile009.png").convert(),
+        pygame.image.load("assets/images/thief/tile010.png").convert(),
+        pygame.image.load("assets/images/thief/tile011.png").convert()
+        ]   #   left
+    }
 
-thief = Player(THIEF_SPRITES[8], SCREEN_CENTER_X, SCREEN_CENTER_Y, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
-# thief.rect.center = screen_rect.center
+THIEF_DIMENSIONS = (37.5,50)
 
-current_sprite = THIEF_SPRITES[8]
+current_sprite_direction = THIEF_SPRITES[3]
+
+current_sprite = current_sprite_direction[2]
+
+thief = Player(current_sprite, SCREEN_CENTER_X, SCREEN_CENTER_Y, 5,moving) #x and y values are in the center but this places the thief 'top left' in the middle
 
 #   item list
 item_list = []
@@ -578,9 +578,7 @@ while True:
             mouse_pos = pygame.mouse.get_pos() 
             
             if game_active:
-                
                 if ui_bg_showing == False:
-                
                     if map_button_rect.collidepoint(mouse_pos) or checklist_button_rect.collidepoint(mouse_pos):
                         ui_bg_showing = True
                     else:
@@ -595,16 +593,13 @@ while True:
                         ui_shown = 'checklist'
                     
                 else:
-                
                     if ui_x_rect.collidepoint(mouse_pos):
                         ui_bg_showing = False
                         
             else:            
                 if not instructions_showing: #  buttons only work when the start screens showing not while instructions are showing
-                    
                     #   start button clicked
                     if start_button_rect.collidepoint(mouse_pos):
-                    
                         #   reset game
                         game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played = reset_game(game_over, floor_shown_surface, items_collected, ending, item_list, current_door_list, map_offset, time_left, end_sound_played)
 
@@ -616,42 +611,65 @@ while True:
                         sys.exit()
 
         if event.type == ANIMATION: #   animation
-            
             if keys[pygame.K_w]:
-                thief_frame = (thief_frame - 1) % 3 
+                current_sprite_direction = THIEF_SPRITES[1] #   up
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_s]:
-                thief_frame = (thief_frame + 1) % 3 + 6
+                current_sprite_direction = THIEF_SPRITES[3] #   down
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_a]:
-                thief_frame = (thief_frame + 1) % 3 + 9  
+                current_sprite_direction = THIEF_SPRITES[4] #   left
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
+                    
             if keys[pygame.K_d]:
-                thief_frame = (thief_frame + 1) % 3 + 3  
+                current_sprite_direction = THIEF_SPRITES[2] #   right
+                
+                if thief_frame < len(current_sprite_direction) - 1:
+                    thief_frame += 1
+                    
+                else:
+                    thief_frame = 0
                 
         if event.type == pygame.KEYDOWN:
-            
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_1]:
-                floor_shown_surface = floor_1_surface
-            if keys[pygame.K_2]:
-                floor_shown_surface = floor_2_surface
-            if keys[pygame.K_3]:
-                floor_shown_surface = floor_3_surface
+            # if keys[pygame.K_1]:
+            #     floor_shown_surface = floor_1_surface
+            # if keys[pygame.K_2]:
+            #     floor_shown_surface = floor_2_surface
+            # if keys[pygame.K_3]:
+            #     floor_shown_surface = floor_3_surface
                 
             if keys[pygame.K_SPACE]:
                 if game_over and not credits_showing:
-                    
-                    print(credits_showing)
+                    # print(credits_showing)
                     credits_showing = True
                     
                 elif credits_showing:
-                    
                     credits_showing = False
                     game_active = False
                     game_over = False
                     
                 elif instructions_showing:
-                    
                     game_active = True
                     
+    #   background music
     if not channel1.get_busy(): #   so it stops trying to play it over and over every second
         channel1.play(music, loops=-1)
     
@@ -714,8 +732,8 @@ while True:
                     current_floor = 3
 
                 # update the current sprite based on the animation frame
-                current_sprite = THIEF_SPRITES[thief_frame]
-                thief.surface = current_sprite
+                current_sprite = current_sprite_direction[thief_frame]
+                thief.surface = pygame.transform.scale(current_sprite, THIEF_DIMENSIONS)
 
                 # update floor position and floor
                 floor_rect = floor_shown_surface.get_rect(center=(MAP_X + map_offset[0], MAP_Y + map_offset[1]))
