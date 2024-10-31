@@ -204,7 +204,6 @@ class Item:
         keys = pygame.key.get_pressed() # to see if c gets pressed
         
         if not self.found: #    only if item isn't found yet
-            
             if self.floor == current_floor: #   only collect items on the same floor
                 
                 if self.min_x_offset <= map_offset_x <= self.max_x_offset and self.min_y_offset <= map_offset_y <= self.max_y_offset:
